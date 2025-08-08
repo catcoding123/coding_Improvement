@@ -1383,5 +1383,119 @@ int longestPalindromeSubseqLCS(string s) {
 
 ---
 
-*记录日期: 2025-08-08*
+## 226. 翻转二叉树 (Easy)
+
+### 核心思想
+二叉树变换的经典题目，体现了**树形递归**的核心思维和**局部独立性**的算法特征。
+
+### 关键逻辑
+1. **树形递归思维**:
+   - 翻转大树 = 交换左右子树 + 递归翻转左右子树
+   - 每个节点只需要管理自己的直接子节点
+   
+2. **三种实现方式的本质**:
+   ```cpp
+   // 1. 递归DFS - 最直观的实现
+   TreeNode* invertTree(TreeNode* root) {
+       if (!root) return nullptr;
+       TreeNode* left = invertTree(root->left);
+       TreeNode* right = invertTree(root->right);
+       root->left = right;
+       root->right = left;
+       return root;
+   }
+   
+   // 2. BFS层序遍历 - 按层处理
+   TreeNode* invertTreeBFS(TreeNode* root) {
+       if (!root) return nullptr;
+       queue<TreeNode*> q;
+       q.push(root);
+       while (!q.empty()) {
+           TreeNode* node = q.front();
+           q.pop();
+           swap(node->left, node->right);
+           if (node->left) q.push(node->left);
+           if (node->right) q.push(node->right);
+       }
+       return root;
+   }
+   
+   // 3. DFS栈模拟 - 手动管理栈
+   TreeNode* invertTreeDFS(TreeNode* root) {
+       if (!root) return nullptr;
+       stack<TreeNode*> st;
+       st.push(root);
+       while (!st.empty()) {
+           TreeNode* node = st.top();
+           st.pop();
+           swap(node->left, node->right);
+           if (node->left) st.push(node->left);
+           if (node->right) st.push(node->right);
+       }
+       return root;
+   }
+   ```
+
+### 深层洞察：算法的"局部独立性"
+
+#### 核心发现
+在翻转二叉树中，**BFS ≈ DFS**，三种方法本质相同：
+- **为什么？** 每个节点的操作是独立的，只需交换自己的左右子树
+- **关键特征**: 节点间没有复杂依赖关系，处理顺序不影响最终结果
+
+#### 算法分类框架
+
+**类型A：局部独立操作** (BFS ≈ DFS)
+- 翻转二叉树 - 每个节点独立交换左右子树
+- 二叉树层序遍历 - 每个节点独立输出
+- 节点值修改 - 每个节点独立处理
+→ **选择原则**: 选择最简洁的实现（通常是递归）
+
+**类型B：全局依赖操作** (BFS ≠ DFS)
+- 路径搜索 - DFS回溯 vs BFS最短路径
+- 二叉树序列化 - 遍历顺序直接影响结果
+- 拓扑排序 - 不同遍历可能产生不同合法序列
+→ **选择原则**: 根据具体需求选择遍历方式
+
+#### 栈版本的微妙细节
+```cpp
+// 交换后再入栈，会改变访问顺序
+swap(node->left, node->right);  // 交换了！
+if (node->left) st.push(node->left);   // 入栈的实际是原来的right
+if (node->right) st.push(node->right); // 入栈的实际是原来的left
+```
+**关键洞察**: 虽然访问顺序改变了，但在局部独立操作中不影响最终结果！
+
+### 时间复杂度分析
+- **所有方法**: 时间O(n) - 每个节点访问一次
+- **空间复杂度**:
+  - 递归: O(h) - 递归栈深度
+  - BFS: O(w) - 队列最大宽度  
+  - 栈DFS: O(h) - 栈深度
+
+### 选择建议
+**推荐递归版本**，因为：
+1. 代码最简洁，逻辑最直观
+2. 完美体现树形递归思维
+3. 在"局部独立"问题中，简洁性最重要
+
+### 易错点
+1. **递归指针混乱**: 先保存子树指针，再交换
+3. **边界处理**: 空节点检查
+
+### 扩展应用
+- 101. 对称二叉树 (判断镜像对称)
+- 100. 相同的树 (递归比较)
+- 951. 翻转等价二叉树 (翻转后判断相等)
+
+### 关键理解
+1. **树形递归精髓**: 大问题分解为子问题的自然递归结构
+2. **算法分类思维**: 识别问题的"局部独立性"特征
+3. **实现选择策略**: 在等效算法中选择最简洁的版本
+
+这道题的价值不仅在于掌握树形递归，更在于建立**算法分类的思维框架**，学会识别不同问题类型的本质特征。
+
+---
+
+*记录日期: 2025-08-09*
 *掌握程度: 🔥 熟练掌握*

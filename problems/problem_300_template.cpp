@@ -76,7 +76,7 @@ public:
         }
 
         // TODO: 返回最大值
-        return *max_element(dp.begin(), dp.end());
+        return *max_element(dp.begin(), dp.end()); // 这里不一定是dp[n-1]，在复习的时候出错了
     }
     
     // 方法2: 贪心 + 二分查找 - O(n log n) 最优解法 ⭐⭐
