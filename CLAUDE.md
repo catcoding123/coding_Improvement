@@ -15,6 +15,7 @@ test_code/
 ├── cpp_optimized_plan.md            # C++优化学习计划
 ├── problem_analysis_template.md      # 题目分析模板
 ├── leetcode_extension_map.md        # 扩展题目映射
+├── daily_review_checklist.md        # 每日AI智能复习
 └── problems/                         # 题目实现目录
     ├── Makefile                      # 自动化编译脚本
     ├── README.md                     # 题目目录说明
@@ -185,14 +186,21 @@ make clean
    - 更新专题掌握情况
 
 3. **`error_tracking_system.md`** (如有错误)
+   - 基于上下文会话不要遗漏错误
    - 记录错误详情和分析
    - 更新错误统计
    - 制定防错措施和复习计划
 
-4. **Git提交格式**
+4. **`coding_standards_checklist.md`**
+   - 对于错误或者重点的c++语法进行及时的记录，不要遗忘
+
+5. **`daily_review_checklist.md`**
+   - 完成相关题目学习之后，生成明天的复习计划
+
+6. **Git提交格式**
 ```bash
 git commit -m "complete problem [题号]: [题目名称]
-
+- 尽量用中文表达
 - Implement [算法类型] solution with [复杂度]
 - Add algorithm notes for [核心概念]
 - Update progress: [专题名称] ([专题进度])
