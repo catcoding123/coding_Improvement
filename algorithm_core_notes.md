@@ -1296,5 +1296,92 @@ int longestPalindromeSubseqLCS(string s) {
 
 ---
 
+## 104. 二叉树的最大深度 (Easy)
+
+### 核心思想
+二叉树深度问题的入门经典，体现了**树形递归**的基本思维模式：大树的问题分解为子树的问题。
+
+### 关键逻辑
+1. **递归结构**:
+   - 树的深度 = max(左子树深度, 右子树深度) + 1
+   - 空节点深度为0
+   
+2. **三种实现方式**:
+   ```cpp
+   // 1. 递归DFS - 最直观
+   int maxDepthRecursive(TreeNode* root) {
+       if (!root) return 0;
+       return max(maxDepthRecursive(root->left), 
+                  maxDepthRecursive(root->right)) + 1;
+   }
+   
+   // 2. BFS层序遍历 - 按层计数
+   int maxDepthBFS(TreeNode* root) {
+       if (!root) return 0;
+       queue<TreeNode*> q;
+       q.push(root);
+       int depth = 0;
+       
+       while (!q.empty()) {
+           int size = q.size();
+           for (int i = 0; i < size; i++) {
+               TreeNode* node = q.front();
+               q.pop();
+               if (node->left) q.push(node->left);
+               if (node->right) q.push(node->right);
+           }
+           depth++;
+       }
+       return depth;
+   }
+   
+   // 3. DFS栈模拟 - 手动管理深度
+   int maxDepthDFS(TreeNode* root) {
+       if (!root) return 0;
+       stack<pair<TreeNode*, int>> st;
+       st.push({root, 1});
+       int maxDepth = 1;
+       
+       while (!st.empty()) {
+           auto [node, depth] = st.top();
+           st.pop();
+           maxDepth = max(maxDepth, depth);
+           
+           if (node->left) st.push({node->left, depth + 1});
+           if (node->right) st.push({node->right, depth + 1});
+       }
+       return maxDepth;
+   }
+   ```
+
+3. **遍历模式对比**:
+   - **递归DFS**: 后序遍历模式，自底向上返回结果
+   - **BFS**: 层序遍历，逐层处理，层数即深度
+   - **栈DFS**: 自顶向下传递深度值，记录最大值
+
+### 时间复杂度分析
+- **所有方法**: 时间O(n) - 每个节点访问一次
+- **空间复杂度差异**:
+  - 递归: O(h) - h是树高度，最坏O(n)（退化为链表）
+  - BFS: O(w) - w是最大宽度，最坏O(n)（完全二叉树）
+  - 栈DFS: O(h) - 同递归
+
+### 易错点
+1. **递归出口**: 空节点返回0，不是1
+2. **BFS层数计算**: 要在处理完整一层后才+1
+3. **栈中深度传递**: 使用`depth + 1`而不是`depth++`
+4. **指针访问**: `node->left`而不是`node.left`
+5. **循环条件**: BFS中使用预存的`size`避免队列大小变化
+
+### 扩展应用
+- 111. 二叉树的最小深度 (修改为min)
+- 110. 平衡二叉树 (比较左右子树深度差)
+- 543. 二叉树的直径 (每个节点的左右深度和)
+
+### 关键理解
+二叉树递归的精髓：**将树形问题转化为子树问题**，通过递归的自然结构解决复杂的树形遍历。
+
+---
+
 *记录日期: 2025-08-08*
 *掌握程度: 🔥 熟练掌握*
