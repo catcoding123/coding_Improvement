@@ -1497,5 +1497,155 @@ if (node->right) st.push(node->right); // 入栈的实际是原来的left
 
 ---
 
+## 94. 二叉树的中序遍历 (Medium)
+
+### 核心思想
+二叉树遍历的经典问题，掌握**栈模拟递归**的通用模式，理解中序遍历在BST中的特殊性质。
+
+### 关键逻辑
+1. **中序遍历顺序**:
+   - 递归模式：左子树 → 根节点 → 右子树
+   - 对于BST：结果必然是有序序列
+
+2. **两种实现方式对比**:
+   ```cpp
+   // 1. 递归实现 - 最直观
+   vector<int> inorderTraversal(TreeNode* root) {
+       if(root == nullptr) return {};
+       vector<int> result;
+       vector<int> left = inorderTraversal(root->left);
+       vector<int> right = inorderTraversal(root->right);
+       
+       result.insert(result.end(), left.begin(), left.end());
+       result.push_back(root->val);
+       result.insert(result.end(), right.begin(), right.end());
+       return result;
+   }
+   
+   // 2. 迭代实现 - 栈模拟递归 ⭐ 核心掌握
+   vector<int> inorderTraversalIterative(TreeNode* root) {
+       vector<int> result;
+       stack<TreeNode*> st;
+       TreeNode* curr = root;
+       
+       while(!st.empty() || curr != nullptr) {
+           // 阶段1: 一路向左，沿途节点入栈
+           while(curr != nullptr) {
+               st.push(curr);
+               curr = curr->left;
+           }
+           
+           // 阶段2: 弹栈访问，然后转向右子树
+           curr = st.top();
+           st.pop();
+           result.push_back(curr->val);
+           curr = curr->right;  // 触发右子树的向左遍历
+       }
+       return result;
+   }
+   ```
+
+### 栈模拟递归的核心模式
+
+#### 深层理解：为什么用curr驱动？
+- **curr是状态指针**：控制"向左深入"和"右子树转移"
+- **栈保存回溯路径**：存储从根到当前位置的路径
+- **三阶段循环**：
+  1. 向左深入 → 路径入栈
+  2. 到达叶子 → 弹栈访问  
+  3. 转向右子树 → 重复循环
+
+#### 关键洞察
+```cpp
+// ❌ 错误理解
+while(curr->left != nullptr) {
+    st.push(curr->left);  // 丢失了当前节点！
+}
+
+// ✅ 正确理解
+while(curr != nullptr) {
+    st.push(curr);        // 保存当前节点用于回溯
+    curr = curr->left;    // 继续向左深入
+}
+```
+
+**为什么必须保存当前节点？**
+- 中序遍历需要在处理完左子树后回到父节点
+- 栈中存储的是"待访问的父节点序列"
+- `curr = node->right` 让右子树也经历完整的遍历过程
+
+### 算法模式总结
+
+#### 栈模拟递归的通用框架
+```cpp
+while(!st.empty() || curr != nullptr) {
+    // 1. 深入阶段：向某个方向探索，沿途保存状态
+    while(curr != nullptr) {
+        st.push(curr);           // 保存当前状态
+        curr = curr->next_dir;   // 继续探索
+    }
+    
+    // 2. 处理阶段：到达边界，开始处理
+    curr = st.top();
+    st.pop();
+    process(curr);               // 处理当前节点
+    
+    // 3. 转移阶段：转向其他方向继续
+    curr = curr->other_dir;      // 转向其他分支
+}
+```
+
+#### 三种遍历的时机差异
+| 遍历类型 | 访问时机 | 模式特点 |
+|----------|----------|----------|
+| **前序** | 入栈时访问 | 根→左→右 |
+| **中序** | 弹栈时访问 | 左→根→右 |
+| **后序** | 需要状态标记 | 左→右→根 |
+
+### 中序遍历的特殊应用
+
+#### BST中的重要性质
+```cpp
+// 验证BST：中序遍历必须严格递增
+bool isValidBST(TreeNode* root) {
+    vector<int> inorder = inorderTraversal(root);
+    for(int i = 1; i < inorder.size(); i++) {
+        if(inorder[i] <= inorder[i-1]) return false;
+    }
+    return true;
+}
+
+// BST中第K小元素：中序遍历的第K个
+int kthSmallest(TreeNode* root, int k) {
+    vector<int> inorder = inorderTraversal(root);
+    return inorder[k-1];
+}
+```
+
+### 时间复杂度分析
+- **递归版本**: 时间O(n)，空间O(h)递归栈 + O(n)结果存储
+- **迭代版本**: 时间O(n)，空间O(h)显式栈 + O(n)结果存储
+- **Morris遍历**: 时间O(n)，空间O(1) - 进阶技巧
+
+### 易错点
+1. **迭代版本循环条件**: `!st.empty() || curr != nullptr` 缺一不可
+2. **状态更新**: `curr = node->right` 而不是 `node = node->right`
+3. **入栈时机**: 向左时入栈，而不是访问时入栈
+
+### 扩展应用
+- 144. 二叉树的前序遍历 (调整访问时机)
+- 145. 二叉树的后序遍历 (需要状态标记)
+- 98. 验证二叉搜索树 (利用有序性)
+- 230. 二叉搜索树中第K小的元素 (提前终止遍历)
+
+### 关键理解
+1. **栈模拟递归的本质**: 显式管理调用栈，控制执行流程
+2. **中序遍历的数学性质**: 在BST中产生有序序列
+3. **迭代vs递归的权衡**: 避免栈溢出 vs 代码简洁性
+
+这道题建立了对**栈模拟递归**的深度理解，这个模式可以推广到很多树形递归问题的迭代实现中。
+
+---
+
 *记录日期: 2025-08-09*
 *掌握程度: 🔥 熟练掌握*
