@@ -151,6 +151,80 @@ bool inorderCheck(TreeNode* node, TreeNode*& prev) {  // 关键: 引用传递
 - **相关题目**: 230. BST第K小元素、99. 恢复BST、108. 有序数组转BST
 
 ---
+
+### 题目: [101] 对称二叉树  
+**错误时间**: 2025/08/09  
+**错误类型**: 🟡 实现错误 + 🔴 逻辑错误  
+**错误原因**: 💭 理解不足 + ⚡ 实现能力
+
+#### 错误详情
+
+**错误1: 逻辑表达式混乱**
+```cpp
+// 我的错误思路: 对称条件的逻辑关系理解错误
+if(!isMirror(left->left, right->right) || isMirror(left->right, right->left)) {
+    return false;
+}
+```
+
+**错误分析**:
+- **问题所在**: 将"两个条件都为true才对称"理解为"任一条件为false就不对称"
+- **为什么错**: 逻辑表`!A || B`在A=true,B=true时返回true，错误地返回false
+- **应该怎么想**: 对称需要同时满足两个条件，应该用`A && B`
+
+**错误2: 迭代版本返回逻辑错误**
+```cpp
+// 我的错误实现: 遇到都为空直接返回true
+if(!left && !right) return true;
+```
+
+**错误分析**:
+- **问题所在**: 将"一对节点都为空"理解为"整个树对称"
+- **为什么错**: 一对节点为空只说明这一对对称，还需检查其他节点对
+- **应该怎么想**: 应该continue继续检查，而不是直接return true
+
+**错误3: 容器API使用混淆**
+```cpp
+// 我的错误尝试: 混淆queue和deque的方法
+q.pop_front();  // ❌ queue没有pop_front方法
+```
+
+**错误分析**:
+- **问题所在**: 混淆了不同容器的接口方法
+- **为什么错**: queue只有front()和pop()，没有pop_front()
+- **应该怎么想**: queue是FIFO接口，用pop()弹出front()元素
+
+#### 正确解法
+**正确思路**:
+双节点同步递归：镜像对称要求两个条件同时满足
+
+**正确代码**:
+```cpp
+bool isMirror(TreeNode* left, TreeNode* right) {
+    if (!left && !right) return true;
+    if (!left || !right) return false;
+    if (left->val != right->val) return false;
+    
+    // ✅ 正确：双条件必须同时满足
+    return isMirror(left->left, right->right) && isMirror(left->right, right->left);
+}
+
+// 迭代版本关键修复
+if (!left && !right) continue;  // ✅ continue不是return true
+```
+
+#### 核心突破点
+1. **逻辑表达式精准理解**: `&&` vs `||` 在条件组合中的正确选择
+2. **迭代控制流理解**: continue vs return在循环中的不同作用
+3. **容器接口熟练度**: 区分queue、deque、stack等容器的方法差异
+4. **双节点递归模式**: 建立全新的递归思维框架
+
+#### 防错措施
+- **复习计划**: 3天后复习逻辑表达式设计，1周后复习双节点递归模式
+- **记忆要点**: "对称=双条件并且，continue=检查下一个，queue只有pop()"
+- **相关题目**: 100. 相同的树、572. 子树判断、951. 翻转等价二叉树
+
+---
 ```
 
 **关键insight**:

@@ -374,6 +374,181 @@ void inorderWithCondition(TreeNode* node, Condition& condition, Result& result) 
 - **面试进阶**：添加节点计数优化到O(H)查找
 
 ---
+
+## 101. 对称二叉树 (Easy)
+
+### 核心思想
+引入**双节点同步递归**新模式：通过同时比较两个节点判断二叉树的轴对称性。
+
+### 算法思维的重大突破
+这道题标志着递归思维模式的重要进化：
+
+```cpp
+// 递归思维模式进化链
+单节点递归 (104深度/226翻转): f(node) → 操作单个节点
+    ↓
+状态传递递归 (98验证/230查找): f(node, &state) → 单节点+全局状态
+    ↓  
+双节点递归 (101对称): f(left, right) → 同步比较两个节点 ← 新突破！
+```
+
+### 核心概念定义
+
+#### 镜像对称的递归定义
+```cpp
+对称条件 = 满足以下所有条件:
+1. left->val == right->val (当前节点值相等)
+2. isMirror(left->left, right->right) (左左 ↔ 右右)
+3. isMirror(left->right, right->left) (左右 ↔ 右左)
+```
+
+#### 空节点处理的四种组合
+```cpp
+if (!left && !right) return true;   // 都为空 → 对称
+if (!left || !right) return false;  // 一个为空 → 不对称
+// 继续比较非空节点...
+```
+
+### 算法实现对比
+
+#### 方法1: 双节点递归 ⭐⭐⭐
+```cpp
+bool isSymmetric(TreeNode* root) {
+    if (!root) return true;
+    return isMirror(root->left, root->right);
+}
+
+bool isMirror(TreeNode* left, TreeNode* right) {
+    if (!left && !right) return true;           // 边界1：都为空
+    if (!left || !right) return false;          // 边界2：一个为空
+    if (left->val != right->val) return false;  // 边界3：值不等
+    
+    // 递归核心：双条件并且关系
+    return isMirror(left->left, right->right) &&   // 左左 ↔ 右右
+           isMirror(left->right, right->left);      // 左右 ↔ 右左
+}
+```
+
+**技术要点**：
+- **双节点参数设计**：`f(left, right)` 同时处理两个节点
+- **边界条件完整性**：涵盖所有空节点组合情况
+- **逻辑表达式精准**：用 `&&` 确保两个镜像条件都满足
+- **递归对应关系**：镜像的精确定义和实现
+
+#### 方法2: 迭代队列模拟
+```cpp
+bool isSymmetricIterative(TreeNode* root) {
+    if (!root) return true;
+    
+    queue<TreeNode*> q;
+    q.push(root->left);
+    q.push(root->right);
+    
+    while (!q.empty()) {
+        TreeNode* left = q.front(); q.pop();
+        TreeNode* right = q.front(); q.pop();
+        
+        if (!left && !right) continue;          // 关键：continue不是return
+        if (!left || !right) return false;
+        if (left->val != right->val) return false;
+        
+        // 按镜像顺序入队
+        q.push(left->left);   q.push(right->right);  // 左左 ↔ 右右
+        q.push(left->right);  q.push(right->left);   // 左右 ↔ 右左
+    }
+    return true;
+}
+```
+
+**技术要点**：
+- **成对节点管理**：队列中每两个节点为一对
+- **关键修复点**：遇到都为空时用 `continue` 而非 `return true`
+- **API差异注意**：`queue.pop()` vs `deque.pop_front()`
+- **镜像入队顺序**：严格按照对称关系入队
+
+### 核心技术突破
+
+#### 1. 双节点递归模式建立
+```cpp
+// 从单节点操作到双节点比较的思维跨越
+单节点模式: TreeNode* node
+双节点模式: TreeNode* left, TreeNode* right
+
+// 参数设计的优雅抽象
+isMirror(left, right) // 判断两个子树是否镜像对称
+```
+
+#### 2. 镜像对应关系的精确理解
+```
+镜像对称的核心：交叉对应
+    L          R
+   / \        / \
+  LL LR  ←→  RL RR
+
+对应关系：
+- L.val == R.val
+- LL ↔ RR (左子树的左孩子 对应 右子树的右孩子)
+- LR ↔ RL (左子树的右孩子 对应 右子树的左孩子)
+```
+
+#### 3. 逻辑表达式的精准设计
+```cpp
+// ❌ 常见错误：逻辑关系混乱
+if (!isMirror(left->left, right->right) || isMirror(left->right, right->left)) {
+    return false;  // 错误：当都为true时也会返回false
+}
+
+// ✅ 正确：双条件必须同时满足
+return isMirror(left->left, right->right) && isMirror(left->right, right->left);
+```
+
+### 算法模式总结
+
+#### 双节点递归的通用框架
+```cpp
+bool compareNodes(TreeNode* node1, TreeNode* node2) {
+    // 边界处理：处理空节点的所有组合
+    if (!node1 && !node2) return baseCondition;
+    if (!node1 || !node2) return failureCondition;
+    
+    // 当前层比较：节点值或其他属性
+    if (!currentLayerCondition(node1, node2)) return false;
+    
+    // 递归调用：定义子问题的对应关系
+    return compareNodes(node1->left, node2->?) &&
+           compareNodes(node1->right, node2->?);
+}
+```
+
+**应用场景扩展**：
+- **相同的树**：`f(p->left, q->left) && f(p->right, q->right)`
+- **对称二叉树**：`f(p->left, q->right) && f(p->right, q->left)`
+- **翻转等价**：两种递归关系的或运算
+- **子树判断**：在每个节点上启动双节点比较
+
+#### 递归设计的关键决策点
+1. **参数设计**：单节点 vs 双节点 vs 多节点
+2. **对应关系**：定义节点间的比较逻辑  
+3. **边界处理**：穷尽所有空节点组合
+4. **递归关系**：子问题如何分解
+5. **终止条件**：何时返回确定结果
+
+### 易错点防范
+
+1. **逻辑表达式错误**：`||` vs `&&` 的正确选择
+2. **边界条件遗漏**：空节点的四种组合处理
+3. **对应关系混乱**：左左↔右右 vs 左右↔右左
+4. **迭代实现细节**：`continue` vs `return true` 的区别
+5. **API使用混淆**：`queue.pop()` vs `deque.pop_front()`
+
+### 知识体系扩展
+这种双节点递归模式为后续算法打下基础：
+- **100. 相同的树**：双节点递归的直接应用
+- **572. 另一棵树的子树**：双节点递归+单节点遍历
+- **951. 翻转等价二叉树**：双节点递归的复杂条件判断
+- **树的路径问题**：多节点同步递归的扩展
+
+---
         while (!dq.empty() && dq.front() <= i - k) {
             dq.pop_front();
         }
