@@ -51,6 +51,156 @@ vector<int> maxSlidingWindow(vector<int>& nums, int k) {
         while (!dq.empty() && dq.front() <= i - k) {
             dq.pop_front();
         }
+        // 维护单调性
+        while (!dq.empty() && nums[dq.back()] <= nums[i]) {
+            dq.pop_back();
+        }
+        dq.push_back(i);
+        // 当窗口满时，队首就是最大值
+        if (i >= k - 1) {
+            result.push_back(nums[dq.front()]);
+        }
+    }
+    return result;
+}
+```
+
+---
+
+## 98. 验证二叉搜索树 (Medium) 
+
+### 核心思想
+利用**BST的中序遍历性质**：有效BST的中序遍历结果必须**严格递增**。
+
+### 关键洞察
+1. **BST定义**：左子树所有节点 < 根 < 右子树所有节点 (不是简单的parent-child关系)
+2. **中序遍历特性**：对BST进行中序遍历得到有序序列
+3. **引用传递必要性**：需要跨递归调用维护全局的前驱节点状态
+
+### 算法分析对比
+
+#### 方法1: 中序遍历 + 有序性检查 ⭐
+```cpp
+bool isValidBST(TreeNode* root) {
+    TreeNode* prev = nullptr;
+    return inorderCheck(root, prev);
+}
+
+bool inorderCheck(TreeNode* node, TreeNode*& prev) {  // 关键：引用传递
+    if (!node) return true;
+    
+    // 左子树检查
+    if (!inorderCheck(node->left, prev)) return false;
+    
+    // 当前节点检查 (中序遍历的"根"步骤)
+    if (prev && prev->val >= node->val) return false;
+    prev = node;  // 更新前驱节点
+    
+    // 右子树检查
+    return inorderCheck(node->right, prev);
+}
+```
+
+**优势**：
+- 代码简洁，直接利用BST性质
+- 时间O(n)，空间O(h)
+- 一旦发现违反顺序就立即返回，效率高
+
+#### 方法2: 范围递归验证
+```cpp
+bool validateRange(TreeNode* node, long long minVal, long long maxVal) {
+    if (!node) return true;
+    if (node->val <= minVal || node->val >= maxVal) return false;
+    
+    return validateRange(node->left, minVal, node->val) &&
+           validateRange(node->right, node->val, maxVal);
+}
+```
+
+**优势**：
+- 直接验证BST定义，思路清晰
+- 适用范围更广，可扩展到其他范围约束问题
+- 每个节点只访问一次
+
+### 核心技术突破
+
+#### 1. 引用传递的深度理解
+```cpp
+// ❌ 错误：值传递无法跨递归层传递状态
+bool helper(TreeNode* node, TreeNode* prev) {
+    prev = node;  // 只修改局部副本
+}
+
+// ✅ 正确：引用传递维护全局状态
+bool helper(TreeNode* node, TreeNode*& prev) {
+    prev = node;  // 修改影响所有递归调用
+}
+```
+
+**原理**：中序遍历的"前一个节点"是全局序列概念，不是递归层局部概念。
+
+#### 2. 中序遍历模式的通用性
+标准中序遍历框架：
+```cpp
+void inorder(TreeNode* node) {
+    if (!node) return;
+    inorder(node->left);   // 左
+    process(node);         // 根 - 处理当前节点
+    inorder(node->right);  // 右
+}
+```
+
+在BST验证中，`process(node)`变成了有序性检查。
+
+#### 3. 经典陷阱的识别
+```
+反例：[10,5,15,null,null,6,20]
+    10
+   /  \
+  5   15
+     /  \
+    6   20
+```
+- **直观判断**：6 < 15 ✓，似乎正确
+- **BST本质**：6在根10的右子树但6 < 10 ❌
+- **中序遍历**：5,10,6,15,20 → 10 > 6 违反递增
+
+### 算法模式总结
+
+#### BST验证的两种思维模式
+1. **性质验证模式**：利用BST的固有性质(中序遍历有序)
+2. **定义验证模式**：直接验证BST的定义(范围约束)
+
+两种模式本质等价，但适用场景不同：
+- 性质验证：适合需要遍历处理的场景
+- 定义验证：适合需要区间约束的场景
+
+#### 递归状态传递模式
+```cpp
+// 跨层状态传递的三种方式
+1. 引用传递：bool helper(TreeNode* node, Type& state)
+2. 返回值传递：Type helper(TreeNode* node, Type state)  
+3. 全局变量：class成员变量 (不推荐)
+```
+
+### 易错点防范
+
+1. **参数传递类型**：必须用引用传递维护前驱状态
+2. **空节点处理**：`if (!node) return true` - 空子树是有效BST
+3. **严格递增**：用`>=`而不是`>`，BST不允许相等值
+4. **边界值处理**：使用`long long`避免INT_MIN/MAX边界问题
+5. **BST定义理解**：不是简单的parent-child关系，而是子树整体约束
+
+### 扩展应用
+- **230. 二叉搜索树中第K小的元素**：中序遍历第K个节点
+- **99. 恢复二叉搜索树**：中序遍历找到违反顺序的节点
+- **108. 将有序数组转换为二叉搜索树**：利用BST性质构建平衡树
+- **验证其他树性质**：AVL树平衡因子、红黑树性质等
+
+---
+        while (!dq.empty() && dq.front() <= i - k) {
+            dq.pop_front();
+        }
         
         // 维护单调性
         while (!dq.empty() && nums[dq.back()] <= nums[i]) {
