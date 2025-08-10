@@ -1,898 +1,148 @@
-# 算法核心逻辑记录
+# 算法核心笔记
 
-## 239. 滑动窗口最大值 (Hard)
+## 栈队列专题
 
-### 核心思想
-使用**单调双端队列**维护滑动窗口中的最大值，队列中存储数组下标，保持对应值的递减顺序。
+### 239. 滑动窗口最大值 (Hard) - 单调队列
+**核心思想**: 单调双端队列维护窗口最大值，存储下标，保持递减序列
+**关键操作**: 移除过期元素 → 维护单调性 → 添加当前元素
+**复杂度**: O(n) - 每个元素最多入队出队一次
+**易错点**: 存储下标不是值，过期判断`<=`，窗口满判断`i >= k - 1`
 
-### 关键逻辑
-1. **队列维护策略**:
-   - 存储下标而非值，便于判断元素是否过期
-   - 维护递减序列，队首永远是当前窗口最大值
-   
-2. **三个核心操作**:
-   ```cpp
-   // 1. 移除过期元素（超出窗口范围）
-   while (!dq.empty() && dq.front() <= i - k) {
-       dq.pop_front();
-   }
-   
-   // 2. 维护单调性（移除比当前元素小的所有元素）
-   while (!dq.empty() && nums[dq.back()] <= nums[i]) {
-       dq.pop_back();
-   }
-   
-   // 3. 添加当前元素
-   dq.push_back(i);
-   ```
+### 155. 最小栈 (Medium) - 双栈设计
+**核心思想**: 主栈+辅助栈，辅助栈维护最小值
+**关键技巧**: push时用`<=`处理重复最小值
+**复杂度**: O(1)所有操作
 
-3. **为什么可以移除较小元素？**
-   - 如果新元素比队尾元素大，那么在新元素还在窗口内时，队尾元素永远不可能成为最大值
-   - 这是贪心思想的体现
+### 84. 柱状图中最大矩形 (Hard) - 单调栈
+**核心思想**: 单调递增栈，弹栈时计算面积
+**关键公式**: `面积 = 高度 × (右边界 - 左边界 - 1)`
+**技巧**: 数组两端加0简化边界处理
 
-### 时间复杂度分析
-- **O(n)**: 每个元素最多入队和出队各一次
-- 比暴力O(nk)和堆O(n log n)都要优
+### 42. 接雨水 (Hard) - 单调栈变种
+**核心思想**: 单调递减栈，按层计算雨水
+**关键要素**: 左边界(栈中剩余) + 底部(弹出元素) + 右边界(当前元素)
 
-### 易错点
-1. 队列存储下标而非值
-2. 过期判断条件是 `dq.front() <= i - k`
-3. 单调性维护用 `<=` 还是 `<` (通常用`<=`避免重复值)
-4. 窗口满的判断条件 `i >= k - 1`
+## 动态规划专题
 
-### 模板代码
+### 70. 爬楼梯 (Easy) - DP入门
+**状态定义**: `dp[i]` = 爬到第i阶的方法数
+**转移方程**: `dp[i] = dp[i-1] + dp[i-2]`
+**四种实现**: 递归、记忆化、DP、空间优化
+
+### 198. 打家劫舍 (Medium) - 决策类DP
+**状态定义**: `dp[i]` = 偷前i+1间房的最大金额
+**转移方程**: `dp[i] = max(nums[i] + dp[i-2], dp[i-1])`
+**核心**: 每步做选择决策，约束影响状态转移
+
+### 53. 最大子数组和 (Medium) - 连续子数组DP
+**核心算法**: Kadane算法
+**转移方程**: `dp[i] = max(nums[i], dp[i-1] + nums[i])`
+**关键理解**: "继续vs重新开始"的决策
+
+### 322. 零钱兑换 (Medium) - 完全背包
+**状态定义**: `dp[i]` = 组成金额i的最少硬币数
+**转移方程**: `dp[i] = min(dp[i-coin] + 1)`
+**关键**: 完全背包允许重复使用，内层循环可用已更新值
+
+### 300. 最长递增子序列 (Medium) - 序列DP
+**状态定义**: `dp[i]` = 以nums[i]结尾的LIS长度
+**优化**: 贪心+二分查找达到O(n log n)
+**易错**: 返回`max(dp)`而非`dp[n-1]`
+
+### 1143. 最长公共子序列 (Medium) - 双序列DP
+**状态定义**: `dp[i][j]` = 两序列前缀LCS长度
+**转移**: 匹配时`dp[i-1][j-1]+1`，不匹配时取最优
+**优化**: 滚动数组降低空间复杂度
+
+### 516. 最长回文子序列 (Medium) - 区间DP
+**状态定义**: `dp[i][j]` = s[i..j]的回文子序列长度
+**关键**: 按区间长度递增遍历
+**转移**: 两端匹配+2，不匹配选择最优子区间
+
+## 二叉树专题
+
+### 104. 二叉树最大深度 (Easy) - 递归入门
+**核心思想**: 大树问题分解为子树问题
+**递归公式**: `max(左深度, 右深度) + 1`
+**三种实现**: 递归DFS、BFS层序、DFS栈模拟
+
+### 226. 翻转二叉树 (Easy) - 树形变换
+**核心洞察**: 算法局部独立性，每个节点只管自己的左右交换
+**重要**: BFS≈DFS适用于局部独立操作
+**易错**: 递归时先保存子树指针再交换
+
+### 94. 二叉树中序遍历 (Medium) - 栈模拟递归
+**核心模式**: "向左深入→弹栈访问→右转重复"
+**关键**: curr指针驱动，栈保存回溯路径
+**应用**: BST中序遍历有序，可用于验证和查找
+
+### 98. 验证BST (Medium) - 引用传递+中序遍历
+**核心思想**: 利用BST中序遍历严格递增性质
+**关键突破**: 引用传递`TreeNode*& prev`维护全局前驱状态
+**BST定义**: 不是简单父子关系，而是整体子树约束
+
+### 230. BST第K小元素 (Medium) - 知识融合+提前终止
+**核心思想**: 中序遍历+计数器+提前终止优化
+**知识融合**: 98题BST性质 + 94题中序遍历 + 引用传递
+**效率优化**: O(H+k) vs O(n)，提前终止避免无效遍历
+**通用模式**: BST+中序遍历可扩展到99、108、173等题
+
+### 101. 对称二叉树 (Easy) - 双节点递归突破
+**算法革命**: 从单节点递归到双节点同步递归的思维跃迁
+**对称关系**: 左左↔右右、左右↔右左的交叉对应
+**递归设计**: 双参数、边界处理、镜像调用的系统思考
+**实现对比**: 递归版本vs迭代队列的双重掌握
+
+### 99. 恢复BST (Hard) - 逆序对识别+状态管理
+**核心算法**: 中序遍历+逆序对识别+节点值交换
+**逆序对模式**: 
+- 相邻交换: 一个逆序对 `[1,3,2,4]` → 同时设置firstError/secondError
+- 不相邻交换: 两个逆序对 `[1,4,3,2,5]` → 第二次仅更新secondError
+**状态管理**: 三指针协调 - prev、firstError、secondError
+**进阶扩展**: Morris遍历实现O(1)空间复杂度
+**易错点**: 相邻交换需同时设置两个错误节点，不相邻交换分两次设置
+**技术突破**: 引用传递维护全局前驱状态
+**经典陷阱**: BST不是简单父子关系，而是子树整体约束
 ```cpp
-vector<int> maxSlidingWindow(vector<int>& nums, int k) {
-    vector<int> result;
-    deque<int> dq;  // 存储下标，保持递减顺序
-    
-    for (int i = 0; i < nums.size(); i++) {
-        // 移除过期元素
-        while (!dq.empty() && dq.front() <= i - k) {
-            dq.pop_front();
-        }
-        // 维护单调性
-        while (!dq.empty() && nums[dq.back()] <= nums[i]) {
-            dq.pop_back();
-        }
-        dq.push_back(i);
-        // 当窗口满时，队首就是最大值
-        if (i >= k - 1) {
-            result.push_back(nums[dq.front()]);
-        }
-    }
-    return result;
-}
-```
-
----
-
-## 98. 验证二叉搜索树 (Medium) 
-
-### 核心思想
-利用**BST的中序遍历性质**：有效BST的中序遍历结果必须**严格递增**。
-
-### 关键洞察
-1. **BST定义**：左子树所有节点 < 根 < 右子树所有节点 (不是简单的parent-child关系)
-2. **中序遍历特性**：对BST进行中序遍历得到有序序列
-3. **引用传递必要性**：需要跨递归调用维护全局的前驱节点状态
-
-### 算法分析对比
-
-#### 方法1: 中序遍历 + 有序性检查 ⭐
-```cpp
-bool isValidBST(TreeNode* root) {
-    TreeNode* prev = nullptr;
-    return inorderCheck(root, prev);
-}
-
-bool inorderCheck(TreeNode* node, TreeNode*& prev) {  // 关键：引用传递
+bool inorderCheck(TreeNode* node, TreeNode*& prev) {
     if (!node) return true;
-    
-    // 左子树检查
     if (!inorderCheck(node->left, prev)) return false;
-    
-    // 当前节点检查 (中序遍历的"根"步骤)
     if (prev && prev->val >= node->val) return false;
-    prev = node;  // 更新前驱节点
-    
-    // 右子树检查
+    prev = node;
     return inorderCheck(node->right, prev);
 }
 ```
 
-**优势**：
-- 代码简洁，直接利用BST性质
-- 时间O(n)，空间O(h)
-- 一旦发现违反顺序就立即返回，效率高
+### 230. BST第K小元素 (Medium) - 知识融合+提前终止
+**核心思想**: BST中序遍历+计数器，O(H+k)优化
+**知识融合**: 98题BST性质 + 94题中序遍历 + 引用传递
+**关键**: `k==0`时提前终止，避免继续递归
 
-#### 方法2: 范围递归验证
+### 101. 对称二叉树 (Easy) - 双节点递归
+**算法突破**: 从单节点递归跃升到双节点同步递归
+**镜像定义**: 左左↔右右，左右↔右左的交叉对应
+**边界处理**: 四种空节点组合的完整处理
 ```cpp
-bool validateRange(TreeNode* node, long long minVal, long long maxVal) {
-    if (!node) return true;
-    if (node->val <= minVal || node->val >= maxVal) return false;
-    
-    return validateRange(node->left, minVal, node->val) &&
-           validateRange(node->right, node->val, maxVal);
-}
-```
-
-**优势**：
-- 直接验证BST定义，思路清晰
-- 适用范围更广，可扩展到其他范围约束问题
-- 每个节点只访问一次
-
-### 核心技术突破
-
-#### 1. 引用传递的深度理解
-```cpp
-// ❌ 错误：值传递无法跨递归层传递状态
-bool helper(TreeNode* node, TreeNode* prev) {
-    prev = node;  // 只修改局部副本
-}
-
-// ✅ 正确：引用传递维护全局状态
-bool helper(TreeNode* node, TreeNode*& prev) {
-    prev = node;  // 修改影响所有递归调用
-}
-```
-
-**原理**：中序遍历的"前一个节点"是全局序列概念，不是递归层局部概念。
-
-#### 2. 中序遍历模式的通用性
-标准中序遍历框架：
-```cpp
-void inorder(TreeNode* node) {
-    if (!node) return;
-    inorder(node->left);   // 左
-    process(node);         // 根 - 处理当前节点
-    inorder(node->right);  // 右
-}
-```
-
-在BST验证中，`process(node)`变成了有序性检查。
-
-#### 3. 经典陷阱的识别
-```
-反例：[10,5,15,null,null,6,20]
-    10
-   /  \
-  5   15
-     /  \
-    6   20
-```
-- **直观判断**：6 < 15 ✓，似乎正确
-- **BST本质**：6在根10的右子树但6 < 10 ❌
-- **中序遍历**：5,10,6,15,20 → 10 > 6 违反递增
-
-### 算法模式总结
-
-#### BST验证的两种思维模式
-1. **性质验证模式**：利用BST的固有性质(中序遍历有序)
-2. **定义验证模式**：直接验证BST的定义(范围约束)
-
-两种模式本质等价，但适用场景不同：
-- 性质验证：适合需要遍历处理的场景
-- 定义验证：适合需要区间约束的场景
-
-#### 递归状态传递模式
-```cpp
-// 跨层状态传递的三种方式
-1. 引用传递：bool helper(TreeNode* node, Type& state)
-2. 返回值传递：Type helper(TreeNode* node, Type state)  
-3. 全局变量：class成员变量 (不推荐)
-```
-
-### 易错点防范
-
-1. **参数传递类型**：必须用引用传递维护前驱状态
-2. **空节点处理**：`if (!node) return true` - 空子树是有效BST
-3. **严格递增**：用`>=`而不是`>`，BST不允许相等值
-4. **边界值处理**：使用`long long`避免INT_MIN/MAX边界问题
-5. **BST定义理解**：不是简单的parent-child关系，而是子树整体约束
-
-### 扩展应用
-- **230. 二叉搜索树中第K小的元素**：中序遍历第K个节点
-- **99. 恢复二叉搜索树**：中序遍历找到违反顺序的节点
-- **108. 将有序数组转换为二叉搜索树**：利用BST性质构建平衡树
-- **验证其他树性质**：AVL树平衡因子、红黑树性质等
-
----
-
-## 230. 二叉搜索树中第K小的元素 (Medium)
-
-### 核心思想
-深度应用**BST中序遍历有序性**：第K小元素 = 中序遍历的第K个节点，关键是实现**提前终止优化**。
-
-### 知识链接融合
-这道题完美融合了前面学过的核心概念：
-- **98题BST验证** → **230题BST应用**：从验证性质到利用性质
-- **94题中序遍历** → **230题目标查找**：从完整遍历到提前终止
-- **引用传递概念** → **计数器状态管理**：跨递归调用的状态同步
-
-### 算法对比分析
-
-#### 方法1: 递归中序遍历 + 计数器 ⭐⭐⭐
-```cpp
-int kthSmallest(TreeNode* root, int k) {
-    int result = 0;
-    inorderTraversal(root, k, result);
-    return result;
-}
-
-void inorderTraversal(TreeNode* node, int& k, int& result) {
-    if (!node) return;
-    
-    inorderTraversal(node->left, k, result);   // 左子树
-    k--;                                       // 计数器递减
-    if (k == 0) {                             // 找到第k个，提前终止
-        result = node->val;
-        return;
-    }
-    inorderTraversal(node->right, k, result);  // 右子树
-}
-```
-
-**技术要点**：
-- **引用传递双参数**：`int& k, int& result`维护全局状态
-- **提前终止核心**：`k==0`时立即返回，避免继续遍历
-- **标准中序框架**：左 → 根(处理) → 右的经典结构
-
-#### 方法2: 迭代栈模拟中序遍历 ⭐⭐
-```cpp
-int kthSmallestIterative(TreeNode* root, int k) {
-    stack<TreeNode*> st;
-    TreeNode* curr = root;
-    
-    while (!st.empty() || curr != nullptr) {
-        // 向左深入
-        while (curr != nullptr) {
-            st.push(curr);
-            curr = curr->left;
-        }
-        
-        // 弹栈访问节点
-        TreeNode* node = st.top();
-        st.pop();
-        k--;
-        if (k == 0) return node->val;  // 提前终止
-        
-        // 向右转移
-        curr = node->right;
-    }
-    return -1;
-}
-```
-
-**技术要点**：
-- **复用94题模式**：完全相同的栈模拟中序遍历框架
-- **状态变量管理**：`curr`指针驱动循环，栈保存访问路径
-- **易错点防范**：`curr = node->right`的正确赋值
-
-#### 方法3: 暴力收集所有值
-```cpp
-int kthSmallestBruteForce(TreeNode* root, int k) {
-    vector<int> values;
-    collectInorder(root, values);
-    return values[k-1];
-}
-```
-
-### 核心技术突破
-
-#### 1. 提前终止优化的本质
-```cpp
-// ❌ 低效：遍历所有节点
-void inorder(TreeNode* node, vector<int>& values) {
-    // 必须访问所有n个节点
-}
-
-// ✅ 高效：找到目标就停止
-void inorderWithEarlyStop(TreeNode* node, int& k, int& result) {
-    if (k == 0) return;  // 关键：已找到就不再递归
-}
-```
-
-**效率对比**：
-- **无优化**：O(n) - 必须遍历所有节点
-- **有优化**：O(H + k) - 只需遍历到第k个节点
-
-#### 2. BST中序遍历的特殊价值
-```
-BST示例: [5,3,7,2,4,6,8]
-    5
-   / \
-  3   7
- / \ / \
-2  4 6  8
-
-中序遍历: 2,3,4,5,6,7,8 ← 严格递增！
-第1小=2, 第3小=4, 第5小=6
-```
-
-**核心洞察**：BST的中序遍历天然有序，无需额外排序！
-
-#### 3. 递归状态管理的进阶应用
-```cpp
-// 状态传递的三种方式对比
-1. 引用传递：void helper(TreeNode* node, int& k, int& result)    // ✅ 推荐
-2. 返回值传递：pair<int,bool> helper(TreeNode* node, int k)      // 🟡 可用但复杂
-3. 全局变量：class成员变量                                     // ❌ 不推荐
-```
-
-**引用传递优势**：
-- 状态同步：所有递归层共享同一个k和result
-- 提前终止：一旦k=0，所有递归都会停止
-- 代码简洁：无需复杂的返回值处理
-
-### 算法模式总结
-
-#### BST + 中序遍历的通用模式
-```cpp
-// 通用模板：BST中序遍历 + 目标条件
-void inorderWithCondition(TreeNode* node, Condition& condition, Result& result) {
-    if (!node || condition.shouldStop()) return;
-    
-    inorderWithCondition(node->left, condition, result);
-    
-    // 处理当前节点
-    condition.process(node);
-    if (condition.isSatisfied()) {
-        result.setValue(node->val);
-        return;
-    }
-    
-    inorderWithCondition(node->right, condition, result);
-}
-```
-
-**应用场景**：
-- 第K小元素：condition = 计数器
-- 第K大元素：condition = 逆序计数器  
-- 范围查询：condition = 值范围判断
-- 错误检测：condition = 顺序性检查
-
-#### 时间复杂度分析技巧
-```cpp
-最好情况：O(H + k) where k=1，H=logn (平衡树)
-最坏情况：O(n) where k=n (退化为完整遍历)
-平均情况：O(H + k) where H=logn，k通常 << n
-```
-
-### 易错点防范
-
-1. **计数器初值**：k从1开始计数，不是0
-2. **提前终止条件**：`k==0`表示找到，不是`k==1`
-3. **引用传递必须**：计数器必须用引用，否则状态不同步
-4. **栈模拟易错**：`curr = node->right`容易写成其他变量
-5. **边界情况**：k > 树节点总数的处理
-
-### 扩展应用方向
-- **99. 恢复二叉搜索树**：中序遍历找到逆序对
-- **173. 二叉搜索树迭代器**：按需产生下一个最小元素  
-- **108. 将有序数组转换为二叉搜索树**：利用中序性质构建
-- **面试进阶**：添加节点计数优化到O(H)查找
-
----
-
-## 101. 对称二叉树 (Easy)
-
-### 核心思想
-引入**双节点同步递归**新模式：通过同时比较两个节点判断二叉树的轴对称性。
-
-### 算法思维的重大突破
-这道题标志着递归思维模式的重要进化：
-
-```cpp
-// 递归思维模式进化链
-单节点递归 (104深度/226翻转): f(node) → 操作单个节点
-    ↓
-状态传递递归 (98验证/230查找): f(node, &state) → 单节点+全局状态
-    ↓  
-双节点递归 (101对称): f(left, right) → 同步比较两个节点 ← 新突破！
-```
-
-### 核心概念定义
-
-#### 镜像对称的递归定义
-```cpp
-对称条件 = 满足以下所有条件:
-1. left->val == right->val (当前节点值相等)
-2. isMirror(left->left, right->right) (左左 ↔ 右右)
-3. isMirror(left->right, right->left) (左右 ↔ 右左)
-```
-
-#### 空节点处理的四种组合
-```cpp
-if (!left && !right) return true;   // 都为空 → 对称
-if (!left || !right) return false;  // 一个为空 → 不对称
-// 继续比较非空节点...
-```
-
-### 算法实现对比
-
-#### 方法1: 双节点递归 ⭐⭐⭐
-```cpp
-bool isSymmetric(TreeNode* root) {
-    if (!root) return true;
-    return isMirror(root->left, root->right);
-}
-
 bool isMirror(TreeNode* left, TreeNode* right) {
-    if (!left && !right) return true;           // 边界1：都为空
-    if (!left || !right) return false;          // 边界2：一个为空
-    if (left->val != right->val) return false;  // 边界3：值不等
-    
-    // 递归核心：双条件并且关系
-    return isMirror(left->left, right->right) &&   // 左左 ↔ 右右
-           isMirror(left->right, right->left);      // 左右 ↔ 右左
+    if (!left && !right) return true;
+    if (!left || !right) return false;
+    if (left->val != right->val) return false;
+    return isMirror(left->left, right->right) && 
+           isMirror(left->right, right->left);
 }
 ```
 
-**技术要点**：
-- **双节点参数设计**：`f(left, right)` 同时处理两个节点
-- **边界条件完整性**：涵盖所有空节点组合情况
-- **逻辑表达式精准**：用 `&&` 确保两个镜像条件都满足
-- **递归对应关系**：镜像的精确定义和实现
-
-#### 方法2: 迭代队列模拟
-```cpp
-bool isSymmetricIterative(TreeNode* root) {
-    if (!root) return true;
-    
-    queue<TreeNode*> q;
-    q.push(root->left);
-    q.push(root->right);
-    
-    while (!q.empty()) {
-        TreeNode* left = q.front(); q.pop();
-        TreeNode* right = q.front(); q.pop();
-        
-        if (!left && !right) continue;          // 关键：continue不是return
-        if (!left || !right) return false;
-        if (left->val != right->val) return false;
-        
-        // 按镜像顺序入队
-        q.push(left->left);   q.push(right->right);  // 左左 ↔ 右右
-        q.push(left->right);  q.push(right->left);   // 左右 ↔ 右左
-    }
-    return true;
-}
+## 递归设计模式进化
+```
+单节点递归 (104/226): f(node) → 操作单个节点
+    ↓
+状态传递递归 (98/230): f(node, &state) → 单节点+全局状态  
+    ↓
+双节点递归 (101): f(left, right) → 同步比较两个节点
 ```
 
-**技术要点**：
-- **成对节点管理**：队列中每两个节点为一对
-- **关键修复点**：遇到都为空时用 `continue` 而非 `return true`
-- **API差异注意**：`queue.pop()` vs `deque.pop_front()`
-- **镜像入队顺序**：严格按照对称关系入队
 
-### 核心技术突破
 
-#### 1. 双节点递归模式建立
-```cpp
-// 从单节点操作到双节点比较的思维跨越
-单节点模式: TreeNode* node
-双节点模式: TreeNode* left, TreeNode* right
-
-// 参数设计的优雅抽象
-isMirror(left, right) // 判断两个子树是否镜像对称
-```
-
-#### 2. 镜像对应关系的精确理解
-```
-镜像对称的核心：交叉对应
-    L          R
-   / \        / \
-  LL LR  ←→  RL RR
-
-对应关系：
-- L.val == R.val
-- LL ↔ RR (左子树的左孩子 对应 右子树的右孩子)
-- LR ↔ RL (左子树的右孩子 对应 右子树的左孩子)
-```
-
-#### 3. 逻辑表达式的精准设计
-```cpp
-// ❌ 常见错误：逻辑关系混乱
-if (!isMirror(left->left, right->right) || isMirror(left->right, right->left)) {
-    return false;  // 错误：当都为true时也会返回false
-}
-
-// ✅ 正确：双条件必须同时满足
-return isMirror(left->left, right->right) && isMirror(left->right, right->left);
-```
-
-### 算法模式总结
-
-#### 双节点递归的通用框架
-```cpp
-bool compareNodes(TreeNode* node1, TreeNode* node2) {
-    // 边界处理：处理空节点的所有组合
-    if (!node1 && !node2) return baseCondition;
-    if (!node1 || !node2) return failureCondition;
-    
-    // 当前层比较：节点值或其他属性
-    if (!currentLayerCondition(node1, node2)) return false;
-    
-    // 递归调用：定义子问题的对应关系
-    return compareNodes(node1->left, node2->?) &&
-           compareNodes(node1->right, node2->?);
-}
-```
-
-**应用场景扩展**：
-- **相同的树**：`f(p->left, q->left) && f(p->right, q->right)`
-- **对称二叉树**：`f(p->left, q->right) && f(p->right, q->left)`
-- **翻转等价**：两种递归关系的或运算
-- **子树判断**：在每个节点上启动双节点比较
-
-#### 递归设计的关键决策点
-1. **参数设计**：单节点 vs 双节点 vs 多节点
-2. **对应关系**：定义节点间的比较逻辑  
-3. **边界处理**：穷尽所有空节点组合
-4. **递归关系**：子问题如何分解
-5. **终止条件**：何时返回确定结果
-
-### 易错点防范
-
-1. **逻辑表达式错误**：`||` vs `&&` 的正确选择
-2. **边界条件遗漏**：空节点的四种组合处理
-3. **对应关系混乱**：左左↔右右 vs 左右↔右左
-4. **迭代实现细节**：`continue` vs `return true` 的区别
-5. **API使用混淆**：`queue.pop()` vs `deque.pop_front()`
-
-### 知识体系扩展
-这种双节点递归模式为后续算法打下基础：
-- **100. 相同的树**：双节点递归的直接应用
-- **572. 另一棵树的子树**：双节点递归+单节点遍历
-- **951. 翻转等价二叉树**：双节点递归的复杂条件判断
-- **树的路径问题**：多节点同步递归的扩展
-
----
-        while (!dq.empty() && dq.front() <= i - k) {
-            dq.pop_front();
-        }
-        
-        // 维护单调性
-        while (!dq.empty() && nums[dq.back()] <= nums[i]) {
-            dq.pop_back();
-        }
-        
-        dq.push_back(i);
-        
-        // 窗口满时记录结果
-        if (i >= k - 1) {
-            result.push_back(nums[dq.front()]);
-        }
-    }
-    return result;
-}
-```
-
-### 扩展应用
-- 滑动窗口最小值 (改为递增队列)
-- 滑动窗口中的中位数
-- 绝对差不超过限制的最长连续子数组
-
----
-
-## 155. 最小栈 (Medium)
-
-### 核心思想
-使用**双栈法**设计支持O(1)获取最小值的栈，主栈存储所有元素，辅助栈存储对应的最小值。
-
-### 关键逻辑
-1. **双栈协同工作**:
-   - 主栈：存储所有push的元素
-   - 辅助栈：存储到当前位置的最小值
-   
-2. **四个核心操作**:
-   ```cpp
-   // push: 主栈总是push，辅助栈按条件push
-   void push(int val) {
-       mainStack.push(val);
-       if (minStack.empty() || val <= minStack.top()) {
-           minStack.push(val);  // 注意：<= 不是 <
-       }
-   }
-   
-   // pop: 同步维护两个栈
-   void pop() {
-       if (mainStack.top() == minStack.top()) {
-           minStack.pop();
-       }
-       mainStack.pop();
-   }
-   
-   // top: 直接返回主栈顶
-   int top() { return mainStack.top(); }
-   
-   // getMin: 直接返回辅助栈顶
-   int getMin() { return minStack.top(); }
-   ```
-
-3. **为什么用<= 而不是< ？**
-   - 处理重复最小值的情况
-   - 例如：push(1) → push(1) → pop()，两个1都需要在辅助栈中
-
-### 时间复杂度分析
-- **所有操作都是O(1)**: push, pop, top, getMin
-- **空间复杂度**: O(n) - 最坏情况两个栈都是n
-
-### 易错点
-1. 辅助栈push条件：必须是 `<=` 处理重复最小值
-2. pop时的同步：只有当主栈顶等于最小值时才pop辅助栈
-3. 空栈检查：pop和top前要确保栈非空
-
-### 模板代码
-```cpp
-class MinStack {
-    stack<int> mainStack, minStack;
-public:
-    void push(int val) {
-        mainStack.push(val);
-        if (minStack.empty() || val <= minStack.top()) {
-            minStack.push(val);
-        }
-    }
-    
-    void pop() {
-        if (mainStack.top() == minStack.top()) {
-            minStack.pop();
-        }
-        mainStack.pop();
-    }
-    
-    int top() { return mainStack.top(); }
-    int getMin() { return minStack.top(); }
-};
-```
-
-### 扩展思考
-- 单栈存储差值法：节省空间但实现复杂
-- 最大栈问题：类似思路
-- 支持多种操作的栈设计
-
----
-
-## 84. 柱状图中最大的矩形 (Hard)
-
-### 核心思想
-使用**单调递增栈**找到每个柱子的左右边界，计算以每个柱子为高度的最大矩形面积。
-
-### 关键逻辑
-1. **单调栈维护策略**:
-   - 栈中存储下标，保持对应高度递增
-   - 当遇到更小元素时，弹栈并计算面积
-   
-2. **边界处理技巧**:
-   ```cpp
-   // 在数组两端添加0，简化边界处理
-   heights.insert(heights.begin(), 0);
-   heights.push_back(0);
-   ```
-
-3. **面积计算核心**:
-   ```cpp
-   while (!st.empty() && heights[st.top()] > heights[i]) {
-       int h = heights[st.top()];  // 矩形高度
-       st.pop();                   // 弹出，更新左边界
-       int w = i - st.top() - 1;   // 矩形宽度
-       int area = h * w;           // 计算面积
-   }
-   ```
-
-4. **为什么先取高度再pop？**
-   - 弹栈操作会改变栈顶，影响左边界的确定
-   - 弹出后的栈顶正好是当前柱子左边第一个比它小的位置
-
-### 时间复杂度分析
-- **O(n)**: 每个元素最多入栈和出栈各一次
-- **空间复杂度**: O(n) - 栈的空间
-
-### 易错点
-1. 宽度计算：`w = 右边界 - 左边界 - 1`
-2. 操作顺序：先取高度，再pop，再计算宽度
-3. 边界处理：两端加0避免特殊情况判断
-4. 理解弹栈时机：当前元素小于栈顶时
-
-### 模板代码
-```cpp
-int largestRectangleArea(vector<int>& heights) {
-    stack<int> st;
-    int maxArea = 0;
-    
-    // 边界处理
-    heights.insert(heights.begin(), 0);
-    heights.push_back(0);
-    
-    for (int i = 0; i < heights.size(); i++) {
-        while (!st.empty() && heights[st.top()] > heights[i]) {
-            int h = heights[st.top()];
-            st.pop();
-            int w = i - st.top() - 1;
-            maxArea = max(maxArea, h * w);
-        }
-        st.push(i);
-    }
-    return maxArea;
-}
-```
-
-### 扩展应用
-- 42. 接雨水 (单调栈变种)
-- 85. 最大矩形 (二维扩展)
-- 柱状图相关的最值问题
-
-### 关键洞察
-单调栈的本质是**延迟计算**：
-- 元素在栈中时，右边界未确定
-- 被弹出时，右边界确定，立即计算面积
-- 这种策略保证了O(n)的时间复杂度
-
----
-
-## 42. 接雨水 (Hard)
-
-### 核心思想
-使用**单调递减栈**按层计算雨水面积，栈中存储可能形成凹槽的柱子下标。
-
-### 关键逻辑
-1. **单调栈维护策略**:
-   - 栈中存储下标，保持对应高度递减
-   - 当遇到更高柱子时，说明可以接雨水了
-   
-2. **雨水计算核心**:
-   ```cpp
-   while (!st.empty() && heights[st.top()] < heights[i]) {
-       int bottom = st.top();  // 凹槽底部
-       st.pop();
-       if (st.empty()) break;  // 没有左边界
-       
-       int h = min(heights[st.top()], heights[i]) - heights[bottom];
-       int w = i - st.top() - 1;
-       water += h * w;
-   }
-   ```
-
-3. **与84题的区别**:
-   - 84题：维护递增栈，计算矩形面积
-   - 42题：维护递减栈，计算雨水体积
-
-### 直观理解
-雨水的形成需要三个要素：
-- **左边界**：栈中剩余元素
-- **底部**：被弹出的元素  
-- **右边界**：当前遍历元素
-
-### 时间复杂度分析
-- **O(n)**: 每个元素最多入栈和出栈各一次
-- **空间复杂度**: O(n) - 栈的空间
-
-### 模板代码
-```cpp
-int trap(vector<int>& height) {
-    stack<int> st;
-    int water = 0;
-    
-    for (int i = 0; i < height.size(); i++) {
-        while (!st.empty() && height[st.top()] < height[i]) {
-            int bottom = st.top();
-            st.pop();
-            if (st.empty()) break;
-            
-            int h = min(height[st.top()], height[i]) - height[bottom];
-            int w = i - st.top() - 1;
-            water += h * w;
-        }
-        st.push(i);
-    }
-    return water;
-}
-```
-
-### 扩展思考
-- 双指针解法：从两端向中间移动
-- 动态规划：预计算左右最大高度
-- 单调栈：按层累加雨水面积
-
----
-
-## 70. 爬楼梯 (Easy)
-
-### 核心思想
-动态规划入门经典题，体现了DP的基本思维：**大问题分解为小问题，避免重复计算**。
-
-### 关键逻辑
-1. **状态定义**:
-   - `dp[i]` = 爬到第i阶的方法数
-   
-2. **状态转移方程**:
-   ```
-   dp[i] = dp[i-1] + dp[i-2]
-   ```
-   逻辑：要到第i阶，只能从第(i-1)阶爬1步，或从第(i-2)阶爬2步
-
-3. **边界条件**:
-   ```cpp
-   dp[0] = 1  // 0阶有1种方法（不爬）
-   dp[1] = 1  // 1阶有1种方法
-   dp[2] = 2  // 2阶有2种方法
-   ```
-
-4. **本质**: 斐波那契数列的变种
-
-### 四种实现方式
-
-#### 1. 普通递归 (会超时)
-```cpp
-int climbStairs(int n) {
-    if (n <= 1) return 1;
-    if (n == 2) return 2;
-    return climbStairs(n-1) + climbStairs(n-2);
-}
-```
-**问题**: 重复计算，时间复杂度O(2^n)
-
-#### 2. 记忆化搜索 (自顶向下)
-```cpp
-int helper(int n, vector<int>& memo) {
-    if (n <= 1) return 1;
-    if (n == 2) return 2;
-    if (memo[n] != -1) return memo[n];
-    
-    memo[n] = helper(n-1, memo) + helper(n-2, memo);
-    return memo[n];
-}
-```
-**优势**: 缓存结果，避免重复计算
-
-#### 3. 动态规划 (自底向上) ⭐
-```cpp
-int climbStairs(int n) {
-    if (n <= 1) return 1;
-    vector<int> dp(n + 1);
-    dp[0] = 1; dp[1] = 1; dp[2] = 2;
-    
-    for (int i = 3; i <= n; i++) {
-        dp[i] = dp[i-1] + dp[i-2];
-    }
-    return dp[n];
-}
-```
-
-#### 4. 空间优化 (滚动变量)
-```cpp
-int climbStairs(int n) {
-    if (n <= 1) return 1;
-    if (n == 2) return 2;
-    
-    int prev2 = 1, prev1 = 2;
-    for (int i = 3; i <= n; i++) {
-        int curr = prev1 + prev2;
-        prev2 = prev1;
-        prev1 = curr;
-    }
-    return prev1;
-}
-```
-
-### 复杂度分析
-- **递归**: 时间O(2^n)，空间O(n)
-- **记忆化**: 时间O(n)，空间O(n)
-- **DP**: 时间O(n)，空间O(n)
-- **空间优化**: 时间O(n)，空间O(1)
-
-### DP四要素总结
-1. **状态定义**: dp[i]表示什么
-2. **转移方程**: 当前状态如何由之前状态推导
-3. **边界条件**: 最小子问题的答案
-4. **计算顺序**: 确保依赖关系正确
-
-### 关键理解
-- **记忆化 vs 普通递归**: 记忆化用专门数组永久缓存，普通递归每次重新计算
-- **自顶向下 vs 自底向上**: 记忆化是递归+缓存，DP是循环填表
-- **状态转移**: DP的精髓在于找到状态间的数学关系
 
 ---
 
@@ -2148,5 +1398,64 @@ int kthSmallest(TreeNode* root, int k) {
 
 ---
 
-*记录日期: 2025-08-09*
-*掌握程度: 🔥 熟练掌握*
+
+---
+
+## 易错点总结
+
+### DP类易错点
+1. **状态定义混淆**: "以位置结尾"需要返回全局最大值
+2. **转移方程遗漏**: 忘记比较当前值 `max(dp[i], newValue)`
+3. **边界条件**: 循环范围`i <= amount`不是`i < amount`
+4. **记忆化三步骤**: 检查缓存→计算→存储缓存→返回
+
+### 二叉树类易错点
+1. **引用传递**: 跨递归维护状态必须用`TreeNode*&`
+2. **递归指针混乱**: 先保存子树指针再交换
+3. **双节点递归**: 镜像对应关系，逻辑表达式用`&&`
+4. **栈模拟递归**: curr指针驱动，`curr = node->right`
+5. **BST定义**: 子树整体约束，不是简单父子关系
+
+### 技术细节易错点
+1. **C++语法**: 变量声明用逗号分隔，条件判断加括号
+2. **循环控制**: 避免在循环中使用动态变化的条件
+3. **容器API**: `queue.pop()` vs `deque.pop_front()`
+4. **自增操作**: `depth++`改变原值，`depth+1`不改变
+
+### 核心算法模板
+
+```cpp
+// DP基础模板
+dp[i] = max/min(dp[i], f(dp[j]) + cost)
+
+// BST中序验证模板
+bool inorder(TreeNode* node, TreeNode*& prev) {
+    if (!node) return true;
+    if (!inorder(node->left, prev)) return false;
+    if (prev && prev->val >= node->val) return false;
+    prev = node;
+    return inorder(node->right, prev);
+}
+
+// 双节点递归模板
+bool compare(TreeNode* left, TreeNode* right) {
+    if (!left && !right) return true;
+    if (!left || !right) return false;
+    if (left->val != right->val) return false;
+    return compare(left->left, right->?) && 
+           compare(left->right, right->?);
+}
+
+// 栈模拟递归模板
+while (!st.empty() || curr) {
+    while (curr) {
+        st.push(curr);
+        curr = curr->left;
+    }
+    curr = st.top(); st.pop();
+    process(curr);
+    curr = curr->right;
+}
+```
+
+*最后更新: 2025-08-09*
