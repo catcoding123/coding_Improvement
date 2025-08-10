@@ -198,6 +198,182 @@ void inorder(TreeNode* node) {
 - **验证其他树性质**：AVL树平衡因子、红黑树性质等
 
 ---
+
+## 230. 二叉搜索树中第K小的元素 (Medium)
+
+### 核心思想
+深度应用**BST中序遍历有序性**：第K小元素 = 中序遍历的第K个节点，关键是实现**提前终止优化**。
+
+### 知识链接融合
+这道题完美融合了前面学过的核心概念：
+- **98题BST验证** → **230题BST应用**：从验证性质到利用性质
+- **94题中序遍历** → **230题目标查找**：从完整遍历到提前终止
+- **引用传递概念** → **计数器状态管理**：跨递归调用的状态同步
+
+### 算法对比分析
+
+#### 方法1: 递归中序遍历 + 计数器 ⭐⭐⭐
+```cpp
+int kthSmallest(TreeNode* root, int k) {
+    int result = 0;
+    inorderTraversal(root, k, result);
+    return result;
+}
+
+void inorderTraversal(TreeNode* node, int& k, int& result) {
+    if (!node) return;
+    
+    inorderTraversal(node->left, k, result);   // 左子树
+    k--;                                       // 计数器递减
+    if (k == 0) {                             // 找到第k个，提前终止
+        result = node->val;
+        return;
+    }
+    inorderTraversal(node->right, k, result);  // 右子树
+}
+```
+
+**技术要点**：
+- **引用传递双参数**：`int& k, int& result`维护全局状态
+- **提前终止核心**：`k==0`时立即返回，避免继续遍历
+- **标准中序框架**：左 → 根(处理) → 右的经典结构
+
+#### 方法2: 迭代栈模拟中序遍历 ⭐⭐
+```cpp
+int kthSmallestIterative(TreeNode* root, int k) {
+    stack<TreeNode*> st;
+    TreeNode* curr = root;
+    
+    while (!st.empty() || curr != nullptr) {
+        // 向左深入
+        while (curr != nullptr) {
+            st.push(curr);
+            curr = curr->left;
+        }
+        
+        // 弹栈访问节点
+        TreeNode* node = st.top();
+        st.pop();
+        k--;
+        if (k == 0) return node->val;  // 提前终止
+        
+        // 向右转移
+        curr = node->right;
+    }
+    return -1;
+}
+```
+
+**技术要点**：
+- **复用94题模式**：完全相同的栈模拟中序遍历框架
+- **状态变量管理**：`curr`指针驱动循环，栈保存访问路径
+- **易错点防范**：`curr = node->right`的正确赋值
+
+#### 方法3: 暴力收集所有值
+```cpp
+int kthSmallestBruteForce(TreeNode* root, int k) {
+    vector<int> values;
+    collectInorder(root, values);
+    return values[k-1];
+}
+```
+
+### 核心技术突破
+
+#### 1. 提前终止优化的本质
+```cpp
+// ❌ 低效：遍历所有节点
+void inorder(TreeNode* node, vector<int>& values) {
+    // 必须访问所有n个节点
+}
+
+// ✅ 高效：找到目标就停止
+void inorderWithEarlyStop(TreeNode* node, int& k, int& result) {
+    if (k == 0) return;  // 关键：已找到就不再递归
+}
+```
+
+**效率对比**：
+- **无优化**：O(n) - 必须遍历所有节点
+- **有优化**：O(H + k) - 只需遍历到第k个节点
+
+#### 2. BST中序遍历的特殊价值
+```
+BST示例: [5,3,7,2,4,6,8]
+    5
+   / \
+  3   7
+ / \ / \
+2  4 6  8
+
+中序遍历: 2,3,4,5,6,7,8 ← 严格递增！
+第1小=2, 第3小=4, 第5小=6
+```
+
+**核心洞察**：BST的中序遍历天然有序，无需额外排序！
+
+#### 3. 递归状态管理的进阶应用
+```cpp
+// 状态传递的三种方式对比
+1. 引用传递：void helper(TreeNode* node, int& k, int& result)    // ✅ 推荐
+2. 返回值传递：pair<int,bool> helper(TreeNode* node, int k)      // 🟡 可用但复杂
+3. 全局变量：class成员变量                                     // ❌ 不推荐
+```
+
+**引用传递优势**：
+- 状态同步：所有递归层共享同一个k和result
+- 提前终止：一旦k=0，所有递归都会停止
+- 代码简洁：无需复杂的返回值处理
+
+### 算法模式总结
+
+#### BST + 中序遍历的通用模式
+```cpp
+// 通用模板：BST中序遍历 + 目标条件
+void inorderWithCondition(TreeNode* node, Condition& condition, Result& result) {
+    if (!node || condition.shouldStop()) return;
+    
+    inorderWithCondition(node->left, condition, result);
+    
+    // 处理当前节点
+    condition.process(node);
+    if (condition.isSatisfied()) {
+        result.setValue(node->val);
+        return;
+    }
+    
+    inorderWithCondition(node->right, condition, result);
+}
+```
+
+**应用场景**：
+- 第K小元素：condition = 计数器
+- 第K大元素：condition = 逆序计数器  
+- 范围查询：condition = 值范围判断
+- 错误检测：condition = 顺序性检查
+
+#### 时间复杂度分析技巧
+```cpp
+最好情况：O(H + k) where k=1，H=logn (平衡树)
+最坏情况：O(n) where k=n (退化为完整遍历)
+平均情况：O(H + k) where H=logn，k通常 << n
+```
+
+### 易错点防范
+
+1. **计数器初值**：k从1开始计数，不是0
+2. **提前终止条件**：`k==0`表示找到，不是`k==1`
+3. **引用传递必须**：计数器必须用引用，否则状态不同步
+4. **栈模拟易错**：`curr = node->right`容易写成其他变量
+5. **边界情况**：k > 树节点总数的处理
+
+### 扩展应用方向
+- **99. 恢复二叉搜索树**：中序遍历找到逆序对
+- **173. 二叉搜索树迭代器**：按需产生下一个最小元素  
+- **108. 将有序数组转换为二叉搜索树**：利用中序性质构建
+- **面试进阶**：添加节点计数优化到O(H)查找
+
+---
         while (!dq.empty() && dq.front() <= i - k) {
             dq.pop_front();
         }
