@@ -1439,6 +1439,100 @@ int helper(string& s, int i, int j, vector<vector<int>>& memo) {
   - [ ] 循环边界是否严格推导（i<=n-len而非i<len）
   - [ ] 右端点公式是否正确（j=i+len-1） 
 
+### 题目: [142] 环形链表 II
+**错误时间**: 2025/08/13  
+**错误类型**: 🟡 实现错误  
+**错误原因**: ⚡ 实现能力
+
+#### 错误详情
+
+**错误1: Floyd算法循环判断逻辑错误**
+```cpp
+// 我的错误实现: 循环后错误判断环是否存在
+while(fast && fast->next) {
+    slow = slow->next;
+    fast = fast->next->next;
+}
+if(!fast || !fast->next) return nullptr; // ❌ 这里判断条件重复了
+```
+
+**错误分析**:
+- **问题所在**: 循环结束条件和后续判断条件重复，逻辑冗余
+- **为什么错**: 没有在循环中检查快慢指针是否相遇，而是在循环后再次检查相同条件
+- **应该怎么想**: 应该在循环中检测相遇，循环结束说明无环
+
+**错误2: 哈希表解法插入顺序错误**
+```cpp
+// 我的错误实现: 先移动指针再插入
+while(head) {
+    if(nodeSet.count(head)) {
+        break;
+    }
+    head = head->next;           // ❌ 先移动指针
+    if(head) {
+        nodeSet.insert(head);    // ❌ 再插入下一个节点
+    }
+}
+return head;
+```
+
+**错误分析**:
+- **问题所在**: 
+  1. 先移动指针再插入，导致第一个节点永远不会被插入哈希表
+  2. 发现重复时返回的是重复节点的下一个节点，而不是环入口
+- **为什么错**: 对哈希表检测重复的逻辑理解不够清晰，混淆了检查顺序
+- **应该怎么想**: 应该先检查当前节点→插入当前节点→移动到下一个节点
+
+#### 正确解法
+**正确思路**: Floyd判圈算法 + 哈希表解法的正确实现
+
+**正确代码**:
+```cpp
+// 1. Floyd算法 - 修正版
+ListNode *detectCycle(ListNode *head) {
+    ListNode* slow = head;
+    ListNode* fast = head;
+    
+    while(fast && fast->next) {
+        slow = slow->next;
+        fast = fast->next->next;
+        if(slow == fast) break;  // ✅ 在循环中检测相遇
+    }
+    
+    if(!fast || !fast->next) return nullptr; // 无环
+    
+    fast = head; // 重新从头开始
+    while(slow != fast) {
+        slow = slow->next;
+        fast = fast->next;
+    }
+    return fast;
+}
+
+// 2. 哈希表解法 - 修正版  
+ListNode *detectCycleWithHashSet(ListNode *head) {
+    unordered_set<ListNode*> nodeSet;
+    while(head) {
+        if(nodeSet.count(head)) {
+            return head;         // ✅ 发现重复，直接返回
+        }
+        nodeSet.insert(head);    // ✅ 先插入当前节点
+        head = head->next;       // ✅ 再移动指针
+    }
+    return nullptr;
+}
+```
+
+#### 核心突破点
+1. **Floyd算法理解**: 理解快慢指针相遇条件的检测时机
+2. **哈希表逻辑**: 掌握"检查→插入→移动"的标准流程
+3. **数学原理**: 深入理解c=a的数学推导，为什么重新开始会在环入口相遇
+
+#### 防错措施
+- **复习计划**: 3天后复习Floyd算法数学证明，1周后复习相关环检测题目
+- **记忆要点**: "Floyd检测在循环中，哈希表先查后插再移"
+- **相关题目**: 141. 环形链表、287. 寻找重复数、202. 快乐数
+
 ---
 
 ## 🛠️ 使用工具推荐
