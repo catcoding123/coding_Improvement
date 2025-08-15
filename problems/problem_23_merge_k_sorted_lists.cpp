@@ -78,8 +78,8 @@ public:
         // 1. 递归分解：将K个链表分成两半
         // 2. 递归合并：分别合并左半部分和右半部分
         // 3. 合并结果：将两个有序链表合并成一个
-        
-        return nullptr;
+        if(lists.empty()) return nullptr;
+        return mergeHelper(lists,0,lists.size()-1);
     }
     
     // 方法2: 优先队列(最小堆)
@@ -89,16 +89,43 @@ public:
         // 1. 将所有链表的头节点放入最小堆
         // 2. 每次取出最小节点，将其后继节点放入堆
         // 3. 重复直到堆为空
-        
-        return nullptr;
+        auto cmp = [](ListNode* a, ListNode* b) {return a->val > b->val;}; //后面还要加；吗？
+        struct Cmp {
+            bool operator()(ListNode* a, ListNode* b) { 
+                return a->val > b->val; //return a->val > b->val 表示"如果a的值更大，则a优先级更低"
+            }
+        };
+        priority_queue<ListNode*, vector<ListNode*>, Cmp> pq; //priority_queue别拼错了
+        for(auto list:lists) {
+            if(list) {
+                pq.push(list);
+            }
+        }
+
+        ListNode* dummy = new ListNode(0);
+        ListNode* curr = dummy;
+        while(!pq.empty()) {
+            ListNode* top = pq.top();
+            pq.pop();
+            curr->next = top;
+            curr = curr->next;
+            if(top->next) {
+                pq.push(top->next);
+            }
+        }
+        return dummy->next;
     }
     
     // 方法3: 逐一合并 (朴素解法，用于对比)
     ListNode* mergeKListsOneByOne(vector<ListNode*>& lists) {
         // TODO: 逐一合并链表，复杂度较高但思路简单
         // 思路：依次将每个链表与结果链表合并
-        
-        return nullptr;
+        // ListNode* dummy = new ListNode(0);
+        ListNode* curr = nullptr;
+        for(auto list: lists) {
+            curr = mergeTwoLists(curr,list);
+        }
+        return curr;
     }
 
 private:
@@ -106,16 +133,38 @@ private:
     ListNode* mergeTwoLists(ListNode* list1, ListNode* list2) {
         // TODO: 实现两个有序链表的合并
         // 经典双指针技巧
-        
-        return nullptr;
+        ListNode* dummy = new ListNode(0);
+        ListNode* curr = dummy;
+        while(list1 && list2) {
+            if (list1->val <= list2->val) {
+                curr->next = list1;
+                list1 = list1->next;
+            } else {
+                curr->next = list2;
+                list2 = list2->next;
+            }
+            curr = curr->next;
+        }
+        if(list1) {
+            curr->next = list1;
+        }else{
+            curr->next = list2;
+        }
+
+        return dummy->next;
     }
     
     // 辅助函数：分治合并的递归实现
     ListNode* mergeHelper(vector<ListNode*>& lists, int start, int end) {
         // TODO: 递归合并lists[start...end]范围内的链表
         // 分治思想的核心实现
-        
-        return nullptr;
+        if(start == end) return lists[start];
+        if(start > end) return nullptr;
+        int mid = (start + end) / 2;
+        ListNode* left = mergeHelper(lists, start, mid);
+        ListNode* right = mergeHelper(lists, mid+1, end);
+
+        return mergeTwoLists(left, right);
     }
 };
 

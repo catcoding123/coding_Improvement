@@ -1533,6 +1533,122 @@ ListNode *detectCycleWithHashSet(ListNode *head) {
 - **记忆要点**: "Floyd检测在循环中，哈希表先查后插再移"
 - **相关题目**: 141. 环形链表、287. 寻找重复数、202. 快乐数
 
+### 题目: [23] 合并K个升序链表
+**错误时间**: 2025/08/13  
+**错误类型**: 🟡 实现错误 + 🟢 细节错误  
+**错误原因**: ⚡ 实现能力 + 💭 C++语法理解不足
+
+#### 错误详情
+
+**错误1: 优先队列初始化逻辑错误**
+```cpp
+// 我的错误实现: 修改循环变量副本
+for(auto list:lists) {
+    pq.push(list);
+    list = list->next;  // ❌ list是副本，修改无效
+}
+```
+
+**错误分析**:
+- **问题所在**: `list`是循环变量的副本，修改它不会影响原链表
+- **为什么错**: 对C++值传递和引用传递的理解不够深入
+- **导致后果**: 所有头节点都被放入堆中，但没有处理空链表过滤
+
+**错误2: 分治算法语法错误**
+```cpp
+// 我的错误代码: 赋值操作符写错
+ListNode* right - mergeHelper(lists, mid+1, end);  // ❌ 应该是 =
+```
+
+**错误分析**:
+- **问题所在**: 将赋值操作符`=`错误地写成了减号`-`
+- **为什么错**: 编码时注意力不够集中，语法基础不够扎实
+- **应该怎么想**: 编译前应该仔细检查每行代码的语法正确性
+
+**错误3: 结构体比较器双重错误**
+```cpp
+// 我的错误实现: 指针访问错误 + 比较方向错误
+struct Cmp {
+    bool operator()(ListNode* a, ListNode* b) {
+        return a.val < b.val;  // ❌ 应该是 a->val > b->val
+    }
+};
+```
+
+**错误分析**:
+- **问题1**: 指针访问使用点号而非箭头 - `a.val`应该是`a->val`
+- **问题2**: 比较方向错误 - `<`构造最大堆，`>`构造最小堆
+- **为什么错**: 对指针语法和priority_queue比较器逻辑理解不够深入
+- **应该怎么想**: 指针用`->`，比较器定义的是"谁应该排在后面"
+
+**错误4: Lambda表达式构造问题**
+```cpp
+// 我的错误尝试: 缺少比较器实例传入
+auto cmp = [](ListNode* a, ListNode* b) {return a->val > b->val;};
+priority_queue<ListNode*, vector<ListNode*>, decltype(cmp)> pq;  // ❌ 缺少cmp
+```
+
+**错误分析**:
+- **问题所在**: Lambda表达式类型没有默认构造函数，必须传入实例
+- **为什么错**: 对C++模板和lambda表达式的构造机制理解不够
+- **正确写法**: `priority_queue<...> pq(cmp);`
+
+**错误5: Priority_queue比较器逻辑混淆**
+```cpp
+// 概念混淆: 认为 < 构造最小堆
+return a->val < b->val;  // ❌ 这样构造的是最大堆
+```
+
+**错误分析**:
+- **问题所在**: 误以为"小于号构造最小堆"的直觉理解
+- **正确理解**: 比较器定义的是"第一个参数是否应该排在后面"
+- **记忆技巧**: "大于号构造最小堆，小于号构造最大堆"
+
+#### 正确解法核心要点
+**分治算法**:
+```cpp
+ListNode* mergeHelper(vector<ListNode*>& lists, int start, int end) {
+    if(start == end) return lists[start];
+    if(start > end) return nullptr;
+    int mid = (start + end) / 2;
+    ListNode* left = mergeHelper(lists, start, mid);
+    ListNode* right = mergeHelper(lists, mid+1, end);  // ✅ 等号
+    return mergeTwoLists(left, right);
+}
+```
+
+**优先队列**:
+```cpp
+struct Cmp {
+    bool operator()(ListNode* a, ListNode* b) {
+        return a->val > b->val;  // ✅ 箭头 + 大于号
+    }
+};
+priority_queue<ListNode*, vector<ListNode*>, Cmp> pq;  // ✅ 可默认构造
+
+// 或lambda版本
+auto cmp = [](ListNode* a, ListNode* b) {return a->val > b->val;};
+priority_queue<ListNode*, vector<ListNode*>, decltype(cmp)> pq(cmp);  // ✅ 传入实例
+```
+
+#### 核心突破点
+1. **C++语法精确性**: 指针访问、赋值操作符、模板构造的准确使用
+2. **Priority_queue比较器逻辑**: 理解"排队规则"而非直觉的大小比较
+3. **Lambda表达式类型**: 理解lambda的类型特性和构造要求
+4. **循环变量作用域**: 区分值传递和引用传递的差异
+
+#### 防错措施
+- **语法检查**: 编译前逐行检查语法正确性，特别是操作符和指针访问
+- **概念澄清**: 深入理解priority_queue比较器的"排队规则"逻辑
+- **模板理解**: 加强对C++模板和lambda表达式构造机制的学习
+- **测试验证**: 每个子功能都要独立验证正确性
+
+#### 复习计划
+- **立即复习**: ✅ 已修正所有错误并理解priority_queue比较器逻辑
+- **3天后**: 2025/08/16 - 重点复习C++模板和lambda表达式语法
+- **1周后**: 2025/08/20 - 扩展到其他使用priority_queue的算法题目
+- **1月后**: 2025/09/13 - 检验长期掌握效果
+
 ---
 
 ## 🛠️ 使用工具推荐

@@ -56,6 +56,52 @@ while(fast && fast->next) {
 2. 哈希表解法顺序：先检查→插入→移动，不是先移动再插入
 **相关题目**: 141.环形链表、287.寻找重复数、202.快乐数
 
+### 23. 合并K个升序链表 (Hard) - 分治算法 ⭐⭐
+**核心思想**: 多路归并问题，K路分解为2路的递归思维
+**三种解法对比**:
+1. **分治算法**: O(n log k)时间，O(log k)空间 - 最优解
+2. **优先队列**: O(n log k)时间，O(k)空间 - K路归并经典
+3. **逐一合并**: O(kn)时间，O(1)空间 - 朴素但有效
+
+**分治算法要点**:
+```cpp
+// 递归分解：二分思想
+ListNode* mergeHelper(vector<ListNode*>& lists, int start, int end) {
+    if(start == end) return lists[start];     // 单链表直接返回
+    if(start > end) return nullptr;           // 安全边界
+    int mid = (start + end) / 2;
+    ListNode* left = mergeHelper(lists, start, mid);
+    ListNode* right = mergeHelper(lists, mid+1, end);
+    return mergeTwoLists(left, right);        // 复用21题解法
+}
+```
+
+**优先队列要点**:
+```cpp
+// 关键：比较器构造
+struct Cmp {
+    bool operator()(ListNode* a, ListNode* b) {
+        return a->val > b->val;  // 大于号构造最小堆
+    }
+};
+// 或lambda: auto cmp = [](ListNode* a, ListNode* b) {return a->val > b->val;};
+// priority_queue<ListNode*, vector<ListNode*>, decltype(cmp)> pq(cmp);
+```
+
+**复杂度分析**: 
+- 分治: 每层O(n)合并，共log k层 → O(n log k)
+- 优先队列: n个节点，每次堆操作O(log k) → O(n log k)
+- 逐一: 第i次合并O(i×平均长度) → O(kn)
+
+**易错点**:
+1. Priority_queue比较器：`>`构造最小堆，`<`构造最大堆
+2. Lambda构造问题：需要传入比较器实例`pq(cmp)`
+3. 空链表处理：优先队列入堆前要检查`if(list)`
+4. 分治边界：`start == end`返回单链表
+
+**核心洞察**: 分治将复杂的K路问题转化为熟悉的2路问题，体现算法设计的化繁为简思想
+**相关题目**: 21.合并两个有序链表、88.合并两个有序数组、315.计算右侧小于当前元素的个数
+
 ## 动态规划专题
 
 ### 70. 爬楼梯 (Easy) - DP入门
