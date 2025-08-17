@@ -9,7 +9,7 @@ test_code/
 ├── README.md                          # 项目总览
 ├── CLAUDE.md                         # Claude管理配置文件
 ├── progress_tracker.md               # 详细进度追踪(实时更新)
-├── algorithm_core_notes.md           # 核心算法笔记和模板
+├── algorithm_notes/                  # 核心算法笔记和模板(按专题分类)
 ├── error_tracking_system.md          # 错题跟踪和分析系统
 ├── coding_standards_checklist.md     # 编码规范检查清单
 ├── cpp_optimized_plan.md            # C++优化学习计划
@@ -62,8 +62,9 @@ test_code/
 - **改进计划**: 查看 `error_tracking_system.md` → 改进计划部分
 
 ### 算法模板库
-- **核心算法**: 查看 `algorithm_core_notes.md` 获取最新的算法模板和笔记
-- **易错点**: 查看 `algorithm_core_notes.md` 中各算法的易错点记录
+- **核心算法**: 查看 `algorithm_notes/` 目录下的专题文件获取最新的算法模板和笔记
+- **专题索引**: 查看 `algorithm_notes/README.md` 快速定位相关专题
+- **易错点**: 查看各专题文件中的易错点记录
 
 ## ⚙️ 开发环境和工具链
 
@@ -175,8 +176,8 @@ make clean
 ## 📝 文档更新机制
 
 ### 题目完成后的文档更新顺序
-1. **`algorithm_core_notes.md`** 
-   - 添加算法核心思想和模板
+1. **`algorithm_notes/[专题].md`** 
+   - 添加算法核心思想和模板到对应专题文件
    - 记录易错点和关键洞察
    - 更新复杂度分析和扩展应用
 
@@ -217,7 +218,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>"
 - **定期复习**: 根据`progress_tracker.md`中的复习计划安排
 - **错题优先**: 优先复习`error_tracking_system.md`中记录的错题
 - **专题复习**: 完成新专题前，复习相关的核心题目
-- **模板巩固**: 定期回顾`algorithm_core_notes.md`中的模板
+- **模板巩固**: 定期回顾`algorithm_notes/`目录中各专题的模板
 
 ### 专题切换判断
 - **掌握标准**: 专题内大部分题目达到🔥熟练掌握状态
