@@ -68,7 +68,7 @@ public:
         
         int m = text1.length(), n = text2.length();
         
-        // 创建(m+1)x(n+1)的DP表，多出来的一行一列用于边界 -- 有点类似哨兵，这个也记录到algorithm_core_notes中吧
+        // 创建(m+1)x(n+1)的DP表，多出来的一行一列用于边界 -- 有点类似哨兵，记录在dynamic_programming.md中
         vector<vector<int>> dp(m + 1, vector<int>(n + 1, 0));      
         // TODO: 填充DP表
         for(int i=0; i< m; i++) {

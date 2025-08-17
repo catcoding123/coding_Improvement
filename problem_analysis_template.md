@@ -151,3 +151,49 @@ def test_solution():
 1. 快速回顾核心考点
 2. 重做关键测试用例
 3. 检查之前的易错点
+
+DFS与回溯法的实现对比
+确实，DFS和回溯法在实现上非常相似，但它们在思想和具体实现上有一些关键区别。让我们详细比较一下这两种方法的实现差异。
+
+核心区别
+回溯法实际上是DFS的一种特殊实现，主要区别在于：
+
+回溯法显式地维护当前状态，通过"选择-递归-撤销选择"的步骤
+
+DFS非回溯实现则通过传递状态副本，避免显式地撤销选择
+
+实现对比
+1. 回溯法实现
+cpp
+void backtrack(const string& s, int start, vector<string>& path, vector<vector<string>>& res) {
+    if (start == s.length()) {
+        res.push_back(path);
+        return;
+    }
+    
+    for (int end = start + 1; end <= s.length(); ++end) {
+        string substr = s.substr(start, end - start);
+        if (isPalindrome(substr)) {
+            path.push_back(substr);  // 做出选择
+            backtrack(s, end, path, res);  // 递归
+            path.pop_back();  // 撤销选择
+        }
+    }
+}
+2. DFS非回溯实现
+cpp
+void dfs(const string& s, int start, vector<string> path, vector<vector<string>>& res) {
+    if (start == s.length()) {
+        res.push_back(path);
+        return;
+    }
+    
+    for (int end = start + 1; end <= s.length(); ++end) {
+        string substr = s.substr(start, end - start);
+        if (isPalindrome(substr)) {
+            vector<string> newPath = path;  // 创建副本
+            newPath.push_back(substr);  // 修改副本
+            dfs(s, end, newPath, res);  // 传递副本
+        }
+    }
+}
