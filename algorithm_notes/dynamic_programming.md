@@ -1,13 +1,83 @@
 # 动态规划专题
 
-本专题目录
-- [70. 爬楼梯](#dp-70)
-- [198. 打家劫舍](#dp-198)
-- [53. 最大子数组和](#dp-53)
-- [322. 零钱兑换](#dp-322)
-- [300. 最长递增子序列](#dp-300)
-- [1143. 最长公共子序列](#dp-1143)
-- [516. 最长回文子序列](#dp-516)
+动态规划算法的系统化学习路径，从基础递推到高级区间DP的完整覆盖。
+
+## 本专题目录
+- [动态规划学习路径导图](#dp-roadmap)
+- [核心题目分析](#dp-problems)
+  - [70. 爬楼梯](#dp-70) - DP基础入门
+  - [198. 打家劫舍](#dp-198) - 决策类DP
+  - [53. 最大子数组和](#dp-53) - 连续子数组DP
+  - [322. 零钱兑换](#dp-322) - 完全背包DP
+  - [300. 最长递增子序列](#dp-300) - 序列DP
+  - [1143. 最长公共子序列](#dp-1143) - 双序列DP
+  - [516. 最长回文子序列](#dp-516) - 区间DP
+  - [5. 最长回文子串](#dp-5) - 中心扩展+DP
+  - [121. 买卖股票的最佳时机](#dp-121) - 状态机DP
+- [动态规划调试技巧](#dp-debugging)
+- [DP类型识别与模板](#dp-templates)
+
+---
+
+<a id="dp-roadmap"></a>
+## 动态规划学习路径导图
+
+### 技能进阶矩阵
+```
+基础阶段 (入门必备)
+├── 70. 爬楼梯 (递推关系) ⭐
+├── 198. 打家劫舍 (决策选择) ⭐⭐  
+└── 53. 最大子数组和 (连续约束) ⭐⭐
+
+进阶阶段 (核心技能)
+├── 322. 零钱兑换 (完全背包) ⭐⭐⭐
+├── 300. 最长递增子序列 (序列关系+优化) ⭐⭐⭐
+└── 1143. 最长公共子序列 (双序列) ⭐⭐⭐
+
+高级阶段 (算法融合)
+├── 516. 最长回文子序列 (区间DP) ⭐⭐⭐⭐
+├── 5. 最长回文子串 (中心扩展+DP) ⭐⭐⭐
+└── 121. 买卖股票 (状态机DP) ⭐⭐⭐⭐
+```
+
+### DP类型演进路径
+```
+递推DP (70题)
+    ↓ 
+决策DP (198题) → 连续DP (53题)
+    ↓               ↓
+完全背包DP (322题)   序列DP (300题)
+    ↓               ↓
+双序列DP (1143题) ← 区间DP (516题)
+    ↓               ↓
+状态机DP (121题) ← 字符串DP (5题)
+```
+
+### 核心技能树
+```
+DP基础技能
+├── 状态定义能力 (核心)
+├── 转移方程设计 (关键)
+├── 边界条件处理 (重要)
+└── 优化技巧掌握 (进阶)
+
+DP进阶技能  
+├── 记忆化搜索 (自顶向下)
+├── 状态压缩 (空间优化)
+├── 状态机建模 (复杂场景)
+└── 多维状态设计 (高维问题)
+
+DP优化技能
+├── 滚动数组 (空间O(n)→O(1))
+├── 贪心+二分 (时间O(n²)→O(n log n))
+├── 单调队列 (特殊场景优化)
+└── 矩阵快速幂 (指数级优化)
+```
+
+---
+
+<a id="dp-problems"></a>
+## 核心题目分析
 
 <a id="dp-70"></a>
 ### 70. 爬楼梯 (Easy) - DP入门
@@ -954,3 +1024,604 @@ int longestPalindromeSubseqLCS(string s) {
 
 #### 关键洞察
 区间DP的精髓在于**按区间长度递增的遍历策略**，确保计算大区间时所需的小区间已经计算完毕。"滑动窗口"的思维模式帮助理解这种遍历顺序的必要性。
+
+---
+
+<a id="dp-5"></a>
+### 5. 最长回文子串 (Medium) - 中心扩展+DP
+
+#### 核心思想
+回文子串问题的经典题，掌握中心扩展和动态规划两种核心方法，理解连续性约束与子序列的区别。
+
+#### 关键区别
+- **516题 (子序列)**: 字符可以不连续，要求最长长度
+- **5题 (子串)**: 字符必须连续，要求具体子串
+
+#### 三种实现方式
+
+1) 中心扩展 - O(n²) 推荐 ⭐
+```cpp
+string longestPalindromeCenter(string s) {
+    if (s.empty()) return "";
+    int start = 0, maxLen = 1;
+    
+    for (int i = 0; i < s.length(); i++) {
+        // 奇数长度回文
+        int len1 = expandAroundCenter(s, i, i);
+        // 偶数长度回文  
+        int len2 = expandAroundCenter(s, i, i + 1);
+        int len = max(len1, len2);
+        
+        if (len > maxLen) {
+            maxLen = len;
+            start = i - (len - 1) / 2;
+        }
+    }
+    return s.substr(start, maxLen);
+}
+
+int expandAroundCenter(string& s, int left, int right) {
+    while (left >= 0 && right < s.length() && s[left] == s[right]) {
+        left--;
+        right++;
+    }
+    return right - left - 1;  // 回文长度
+}
+```
+
+2) 动态规划 - O(n²)
+```cpp
+string longestPalindromeDP(string s) {
+    int n = s.length();
+    if (n < 2) return s;
+    
+    vector<vector<bool>> dp(n, vector<bool>(n, false));
+    int start = 0, maxLen = 1;
+    
+    // 单字符都是回文
+    for (int i = 0; i < n; i++) {
+        dp[i][i] = true;
+    }
+    
+    // 按长度递增检查
+    for (int len = 2; len <= n; len++) {
+        for (int i = 0; i <= n - len; i++) {
+            int j = i + len - 1;
+            if (s[i] == s[j]) {
+                if (len == 2 || dp[i+1][j-1]) {
+                    dp[i][j] = true;
+                    if (len > maxLen) {
+                        start = i;
+                        maxLen = len;
+                    }
+                }
+            }
+        }
+    }
+    return s.substr(start, maxLen);
+}
+```
+
+3) Manacher算法 - O(n) 进阶
+```cpp
+// 专门处理回文问题的线性算法，实现较复杂
+string longestPalindromeManacher(string s) {
+    // 预处理：在字符间插入#
+    string processed = "#";
+    for (char c : s) {
+        processed += c;
+        processed += "#";
+    }
+    
+    int n = processed.length();
+    vector<int> P(n, 0);  // P[i]表示以i为中心的回文半径
+    int center = 0, right = 0;  // 当前覆盖最右的回文中心和右边界
+    
+    for (int i = 0; i < n; i++) {
+        int mirror = 2 * center - i;  // i关于center的镜像
+        
+        if (i < right) {
+            P[i] = min(right - i, P[mirror]);
+        }
+        
+        // 尝试扩展
+        while (i + P[i] + 1 < n && i - P[i] - 1 >= 0 && 
+               processed[i + P[i] + 1] == processed[i - P[i] - 1]) {
+            P[i]++;
+        }
+        
+        // 更新center和right
+        if (i + P[i] > right) {
+            center = i;
+            right = i + P[i];
+        }
+    }
+    
+    // 找最长回文
+    int maxLen = 0, centerIndex = 0;
+    for (int i = 0; i < n; i++) {
+        if (P[i] > maxLen) {
+            maxLen = P[i];
+            centerIndex = i;
+        }
+    }
+    
+    int start = (centerIndex - maxLen) / 2;
+    return s.substr(start, maxLen);
+}
+```
+
+---
+
+<a id="dp-121"></a>
+### 121. 买卖股票的最佳时机 (Easy) - 状态机DP
+
+#### 核心思想
+状态机动态规划入门题，建立买入/卖出状态的转移模型，为后续复杂股票问题打基础。
+
+#### 状态机模型
+```
+未持股 ←→ 持股
+  ↑      ↙
+  └─────┘
+  (完成交易)
+```
+
+#### 三种实现方式
+
+1) 状态机DP - O(n) 推荐 ⭐
+```cpp
+int maxProfitStateMachine(vector<int>& prices) {
+    int n = prices.size();
+    if (n <= 1) return 0;
+    
+    // 状态定义
+    int hold = -prices[0];    // 持股状态的最大收益
+    int sold = 0;             // 未持股状态的最大收益
+    
+    for (int i = 1; i < n; i++) {
+        int newHold = max(hold, -prices[i]);        // 继续持股 or 今天买入
+        int newSold = max(sold, hold + prices[i]);  // 继续不持股 or 今天卖出
+        
+        hold = newHold;
+        sold = newSold;
+    }
+    
+    return sold;  // 最终不持股收益最大
+}
+```
+
+2) 单次遍历 - O(n) 经典
+```cpp
+int maxProfitOnePass(vector<int>& prices) {
+    int minPrice = INT_MAX;
+    int maxProfit = 0;
+    
+    for (int price : prices) {
+        if (price < minPrice) {
+            minPrice = price;  // 更新最低买入价
+        } else {
+            maxProfit = max(maxProfit, price - minPrice);  // 更新最大利润
+        }
+    }
+    
+    return maxProfit;
+}
+```
+
+3) 暴力解法 - O(n²) 不推荐
+```cpp
+int maxProfitBrute(vector<int>& prices) {
+    int maxProfit = 0;
+    for (int i = 0; i < prices.size(); i++) {
+        for (int j = i + 1; j < prices.size(); j++) {
+            maxProfit = max(maxProfit, prices[j] - prices[i]);
+        }
+    }
+    return maxProfit;
+}
+```
+
+#### 扩展应用
+- 122. 买卖股票的最佳时机II (多次交易)
+- 123. 买卖股票的最佳时机III (最多2次交易)
+- 188. 买卖股票的最佳时机IV (最多k次交易)
+- 309. 最佳买卖股票时机含冷冻期 (冷冻期约束)
+
+---
+
+<a id="dp-debugging"></a>
+## 动态规划调试技巧
+
+### 🔍 系统化调试流程
+
+#### 1. 状态定义检验
+```cpp
+// 调试清单
+// ✓ 状态定义是否清晰明确？
+// ✓ 是否包含了所有必要信息？
+// ✓ 状态空间大小是否合理？
+// ✓ 边界情况是否考虑周全？
+
+// 示例：检查状态定义
+void debugStateDefinition() {
+    cout << "dp[i]的含义: " << /* 详细描述 */ << endl;
+    cout << "状态空间大小: " << /* 计算结果 */ << endl;
+    cout << "边界情况: " << /* 列举边界 */ << endl;
+}
+```
+
+#### 2. 转移方程验证
+```cpp
+// 手工验证小规模案例
+void verifyTransition(vector<int>& test_case) {
+    cout << "=== 转移方程验证 ===" << endl;
+    for (int i = 0; i < test_case.size(); i++) {
+        cout << "i=" << i << ", 可选转移: ";
+        // 列出所有可能的转移
+        cout << endl;
+    }
+}
+
+// 检查转移方向的正确性
+void checkDependency() {
+    cout << "依赖关系: dp[i] 依赖于 ";
+    // 明确列出依赖的状态
+    cout << endl;
+}
+```
+
+#### 3. 边界条件审查
+```cpp
+// 边界条件检查表
+void boundaryCheck() {
+    cout << "=== 边界条件检查 ===" << endl;
+    cout << "空输入: " << /* 处理方式 */ << endl;
+    cout << "单元素: " << /* 处理方式 */ << endl;
+    cout << "最小有效输入: " << /* 处理方式 */ << endl;
+    cout << "最大规模输入: " << /* 处理方式 */ << endl;
+}
+```
+
+#### 4. DP表可视化
+```cpp
+// DP表打印函数
+void printDPTable(vector<vector<int>>& dp) {
+    cout << "=== DP表状态 ===" << endl;
+    for (int i = 0; i < dp.size(); i++) {
+        for (int j = 0; j < dp[i].size(); j++) {
+            cout << setw(4) << dp[i][j] << " ";
+        }
+        cout << endl;
+    }
+}
+
+// 逐步填充过程
+void stepByStepFill() {
+    cout << "第" << step << "步填充:" << endl;
+    printDPTable(dp);
+    cout << "当前转移: dp[" << i << "][" << j << "] = " << value << endl;
+}
+```
+
+### 🚨 常见错误类型与诊断
+
+#### 错误类型1: 状态定义模糊
+```cpp
+// ❌ 错误示例
+int dp[i];  // 模糊：到第i个位置的"什么"？
+
+// ✅ 正确示例  
+int dp[i];  // 清晰：以第i个元素结尾的最长递增子序列长度
+```
+
+**诊断方法**: 用自然语言完整描述dp[i]的含义
+
+#### 错误类型2: 转移方程遗漏情况
+```cpp
+// ❌ 错误：遗漏比较当前值
+dp[i] = dp[j] + 1;
+
+// ✅ 正确：保留当前最优值
+dp[i] = max(dp[i], dp[j] + 1);
+```
+
+**诊断方法**: 列举所有可能的决策选择
+
+#### 错误类型3: 循环边界错误
+```cpp
+// ❌ 常见错误
+for (int i = 1; i < amount; i++)     // 少算了i=amount
+for (int i = 0; i <= n - len; i++)   // 可能越界
+
+// ✅ 正确处理
+for (int i = 1; i <= amount; i++)    // 包含目标值
+for (int i = 0; i <= n - len; i++)   // 确保j=i+len-1不越界
+```
+
+**诊断方法**: 手工计算边界值，验证索引有效性
+
+#### 错误类型4: 记忆化搜索的缓存问题
+```cpp
+// ❌ 错误：忘记检查缓存
+int dfs(int state) {
+    // 直接计算，未检查memo[state]
+}
+
+// ❌ 错误：忘记存储结果
+int dfs(int state) {
+    if (memo[state] != -1) return memo[state];
+    int result = calculate();
+    return result;  // 未存储到memo
+}
+
+// ✅ 正确模板
+int dfs(int state) {
+    if (base_condition) return base_value;
+    if (memo[state] != -1) return memo[state];  // 检查缓存
+    
+    int result = calculate();
+    return memo[state] = result;  // 存储并返回
+}
+```
+
+### 🛠️ 调试工具集
+
+#### 工具1: DP状态追踪器
+```cpp
+class DPTracker {
+private:
+    vector<string> states;
+    vector<string> transitions;
+    
+public:
+    void recordState(int i, int value, string description) {
+        states.push_back("dp[" + to_string(i) + "] = " + to_string(value) + " (" + description + ")");
+    }
+    
+    void recordTransition(string from, string to, string reason) {
+        transitions.push_back(from + " -> " + to + " (" + reason + ")");
+    }
+    
+    void printTrace() {
+        cout << "=== DP状态追踪 ===" << endl;
+        for (const string& state : states) {
+            cout << state << endl;
+        }
+        cout << "=== 转移记录 ===" << endl;
+        for (const string& trans : transitions) {
+            cout << trans << endl;
+        }
+    }
+};
+```
+
+#### 工具2: 复杂度分析器
+```cpp
+class ComplexityAnalyzer {
+public:
+    static void analyzeTime(int n, int k = 1) {
+        cout << "=== 时间复杂度分析 ===" << endl;
+        cout << "输入规模: n=" << n << ", k=" << k << endl;
+        cout << "预期操作数: " << estimateOps(n, k) << endl;
+        cout << "时间复杂度等级: " << getComplexityLevel(n, k) << endl;
+    }
+    
+    static void analyzeSpace(int dp_size) {
+        cout << "=== 空间复杂度分析 ===" << endl;
+        cout << "DP表大小: " << dp_size << endl;
+        cout << "内存占用: " << dp_size * sizeof(int) << " bytes" << endl;
+    }
+};
+```
+
+#### 工具3: 测试用例生成器
+```cpp
+class DPTestGenerator {
+public:
+    static vector<int> generateWorstCase(int n) {
+        // 生成最坏情况测试用例
+        vector<int> test_case;
+        // 根据具体DP类型生成
+        return test_case;
+    }
+    
+    static vector<int> generateRandomCase(int n) {
+        // 生成随机测试用例
+        vector<int> test_case(n);
+        random_device rd;
+        mt19937 gen(rd());
+        uniform_int_distribution<> dis(1, 100);
+        
+        for (int& val : test_case) {
+            val = dis(gen);
+        }
+        return test_case;
+    }
+};
+```
+
+---
+
+<a id="dp-templates"></a>
+## DP类型识别与模板
+
+### 🎯 快速识别指南
+
+#### 识别决策树
+```
+问题特征分析
+├── 是否有"最优"关键词? (最大、最小、最长、最短)
+│   ├── 是 → 可能是DP问题
+│   └── 否 → 检查其他特征
+├── 是否有重叠子问题?
+│   ├── 是 → DP/记忆化搜索
+│   └── 否 → 贪心/分治
+├── 是否有最优子结构?
+│   ├── 是 → DP适用
+│   └── 否 → 重新考虑算法类型
+└── 状态转移是否清晰?
+    ├── 是 → 设计DP
+    └── 否 → 尝试其他方法
+```
+
+### 📝 核心模板库
+
+#### 模板1: 一维DP基础模板
+```cpp
+int dp1D(vector<int>& nums) {
+    int n = nums.size();
+    if (n == 0) return 0;
+    
+    vector<int> dp(n);
+    dp[0] = /* 边界值 */;
+    
+    for (int i = 1; i < n; i++) {
+        dp[i] = /* 转移方程 */;
+        // 常见形式:
+        // dp[i] = max(dp[i-1], dp[i-2] + nums[i])  // 决策型
+        // dp[i] = dp[i-1] + dp[i-2]                // 递推型
+        // dp[i] = max(dp[i], dp[j] + cost)         // 选择型
+    }
+    
+    return dp[n-1];  // 或 max_element(dp.begin(), dp.end())
+}
+```
+
+#### 模板2: 二维DP基础模板
+```cpp
+int dp2D(string s1, string s2) {
+    int m = s1.length(), n = s2.length();
+    vector<vector<int>> dp(m+1, vector<int>(n+1, 0));
+    
+    // 边界初始化
+    for (int i = 0; i <= m; i++) dp[i][0] = /* 边界值 */;
+    for (int j = 0; j <= n; j++) dp[0][j] = /* 边界值 */;
+    
+    for (int i = 1; i <= m; i++) {
+        for (int j = 1; j <= n; j++) {
+            if (/* 匹配条件 */) {
+                dp[i][j] = dp[i-1][j-1] + /* 匹配收益 */;
+            } else {
+                dp[i][j] = max(dp[i-1][j], dp[i][j-1]);  // 选择最优
+            }
+        }
+    }
+    
+    return dp[m][n];
+}
+```
+
+#### 模板3: 记忆化搜索模板
+```cpp
+class Solution {
+private:
+    unordered_map<string, int> memo;
+    
+public:
+    int dfs(/* 状态参数 */) {
+        // 递归出口
+        if (/* 边界条件 */) return /* 边界值 */;
+        
+        // 构造状态键
+        string key = to_string(param1) + "," + to_string(param2);
+        if (memo.count(key)) return memo[key];
+        
+        // 状态转移
+        int result = INT_MIN;  // 或 INT_MAX, 0 等初始值
+        for (/* 所有可能的选择 */) {
+            result = max(result, dfs(/* 新状态 */) + /* 代价 */);
+        }
+        
+        return memo[key] = result;
+    }
+};
+```
+
+#### 模板4: 区间DP模板
+```cpp
+int intervalDP(string s) {
+    int n = s.length();
+    vector<vector<int>> dp(n, vector<int>(n, 0));
+    
+    // 边界：单个元素
+    for (int i = 0; i < n; i++) {
+        dp[i][i] = /* 单元素值 */;
+    }
+    
+    // 按区间长度递增
+    for (int len = 2; len <= n; len++) {
+        for (int i = 0; i <= n - len; i++) {
+            int j = i + len - 1;
+            
+            if (/* 端点条件 */) {
+                dp[i][j] = dp[i+1][j-1] + /* 端点贡献 */;
+            } else {
+                dp[i][j] = max(dp[i+1][j], dp[i][j-1]);
+            }
+            
+            // 或者枚举分割点
+            for (int k = i; k < j; k++) {
+                dp[i][j] = max(dp[i][j], dp[i][k] + dp[k+1][j] + /* 合并代价 */);
+            }
+        }
+    }
+    
+    return dp[0][n-1];
+}
+```
+
+### 💡 性能优化策略
+
+#### 空间优化技巧
+```cpp
+// 滚动数组优化：O(mn) → O(min(m,n))
+vector<int> prev(n+1), curr(n+1);
+for (int i = 1; i <= m; i++) {
+    for (int j = 1; j <= n; j++) {
+        // 使用prev和curr替代二维数组
+    }
+    swap(prev, curr);  // 高效滚动
+}
+
+// 状态压缩：一维数组倒序更新
+for (int i = 1; i <= m; i++) {
+    for (int j = n; j >= 1; j--) {  // 倒序避免覆盖
+        dp[j] = max(dp[j], dp[j-weight] + value);
+    }
+}
+```
+
+#### 时间优化技巧  
+```cpp
+// 单调队列优化: O(n²) → O(n)
+deque<int> dq;
+for (int i = 0; i < n; i++) {
+    while (!dq.empty() && dq.front() < i - k) dq.pop_front();
+    while (!dq.empty() && dp[dq.back()] <= dp[i]) dq.pop_back();
+    dq.push_back(i);
+    if (i >= k) dp[i] = dp[dq.front()] + cost;
+}
+
+// 贪心+二分优化: O(n²) → O(n log n)  
+vector<int> tails;
+for (int num : nums) {
+    auto it = lower_bound(tails.begin(), tails.end(), num);
+    if (it == tails.end()) {
+        tails.push_back(num);
+    } else {
+        *it = num;
+    }
+}
+```
+
+## 总结与展望
+
+动态规划作为算法设计的核心思想，其精髓在于**将复杂问题分解为重叠子问题**，通过**最优子结构**实现高效求解。掌握DP的关键在于：
+
+1. **状态定义的准确性** - 这是DP设计的基础
+2. **转移方程的完整性** - 确保覆盖所有可能情况  
+3. **边界条件的正确性** - 保证算法的鲁棒性
+4. **优化技巧的熟练性** - 提升算法的实用性
+
+通过系统学习本专题的核心题目，可以建立完整的DP算法体系，为解决更复杂的优化问题奠定坚实基础。
