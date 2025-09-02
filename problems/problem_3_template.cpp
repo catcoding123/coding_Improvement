@@ -88,13 +88,13 @@ public:
     int lengthOfLongestSubstringHashMap(string s) {
         // 用unordered_map记录字符最后出现的位置
         // 遇到重复字符时，直接跳转到重复字符的下一个位置
-        unordered_map<char, int> char_map;
+        unordered_map<char, int> char_map; // 可能的错误：这里是 char不是string
         int left = 0;
         int result = 0;
         
         for(int right = 0; right < s.length(); right++) {
             // 如果字符已存在，更新左边界
-            if(char_map.find(s[right]) != char_map.end()) {
+            if(char_map.find(s[right]) != char_map.end()) { // 用if不用while
                 left = max(left, char_map[s[right]] + 1); // s[right] 这里实际是上一个位置，不是最后的位置
             }
             // 记录字符位置

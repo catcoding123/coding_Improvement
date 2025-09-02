@@ -1,6 +1,7 @@
 /*
 LeetCode 47. 全排列 II (Medium)
-https://leetcode.cn/problems/permutations-ii/
+https://leetcode.cn/problems/permutat
+ions-ii/
 
 题目描述：
 给定一个可包含重复数字的序列 nums ，按任意顺序 返回所有不重复的全排列。
@@ -69,10 +70,10 @@ public:
     vector<vector<int>> permuteUnique(vector<int>& nums) {
         vector<vector<int>> result;
         vector<int> path;
-        vector<bool> used(nums.size(), false);
+        vector<bool> used(nums.size(), false);  // 错误：这个容易漏掉
         
         // 关键步骤：排序，使相同元素相邻
-        sort(nums.begin(), nums.end());
+        sort(nums.begin(), nums.end()); // 错误：去重的任务一定要先排序
         
         backtrack(nums, path, used, result);
         return result;
@@ -94,7 +95,7 @@ private:
         for(int i=0; i< nums.size(); i++) {
             if(used[i]) continue; // 如果这个位置被选择了，就不用选择这个位置元素
 
-            if(i>0 && nums[i] == nums[i-1] && !used[i-1]) {
+            if(i>0 && nums[i] == nums[i-1] && !used[i-1]) { //错误：这里是!used[i-1]不是!used[i]
                 continue;
             } //used 用来判断是否同层，如果同层则剪枝
 

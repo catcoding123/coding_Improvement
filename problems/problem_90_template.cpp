@@ -90,7 +90,7 @@ private:
         // 选择
         for(int i = start; i<nums.size(); i++) {
             // 去重
-            if(i >start && nums[i] == nums[i-1]) continue;
+            if(i >start && nums[i] == nums[i-1]) continue; // 是i>start
             
             current.push_back(nums[i]);
             backtrack(nums,i+1,current,result);

@@ -119,7 +119,9 @@ public:
         ListNode* prevGroupEnd = dummy;
 
         while(hasKNodes(prevGroupEnd->next,k)) {
-            auto [newhead,newtail] =reverseKNodes(prevGroupEnd->next, k);
+            pair<ListNode*, ListNode*> result = reverseKNodes(prevGroupEnd->next, k);
+            ListNode* newhead = result.first;
+            ListNode* newtail = result.second;
             
             prevGroupEnd->next = newhead;
             prevGroupEnd = newtail;
@@ -135,11 +137,12 @@ private:
      */
     bool hasKNodes(ListNode* start, int k) {
         // TODO: 实现计数逻辑
-        while(start) {
+        ListNode* curr = start;
+        while(curr && k > 0) {
             k--;
-            start = start->next;
+            curr = curr->next;
         }
-        return k ==0; 
+        return k == 0; 
     }
     
     /**
@@ -156,14 +159,15 @@ private:
 
         ListNode* pre = nullptr;
         ListNode* startNode = start;
-        while(start && k>0) {
-            ListNode* next = start->next;
-            start->next = pre;
-            pre = start;
-            start = next;
+        ListNode* curr = start;
+        while(curr && k>0) {
+            ListNode* next = curr->next;
+            curr->next = pre;
+            pre = curr;
+            curr = next;
             k--;
         }
-        startNode->next = next;  // 新尾连接到剩余链表
+        startNode->next = curr;  // 新尾连接到剩余链表
 
         return {pre, startNode}; // {newHead, newTail}
     }
