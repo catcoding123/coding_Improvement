@@ -63,34 +63,31 @@ public:
         // 1. 是否需要先排序？为什么？
         // 2. 固定一个数，剩下两个数如何快速找到？
         // 3. 如何跳过重复元素？
+        sort(nums.begin(), nums.end());
         vector<vector<int>> result;
-        // 你的代码实现
-        std::sort(nums.begin(),nums.end());
-        for(int i = 0; i < nums.size(); i++) {
-            if(i > 0 && nums[i] == nums[i-1]) {
-                continue;
-            }
-            int left = i + 1; left = i + 1 // 是为了确保三元组下标互不相同，并且只在 i 后面找剩下两个数，避免重复和错误组合
+        if(nums.size() <3) return result;
+
+        for(int i=0; i<nums.size(); i++) {
+            if(nums[i] >0) break;
+            if (i>0 && nums[i] == nums[i-1]) continue;
+
+            int left = i+1;
             int right = nums.size() - 1;
             while(left < right) {
                 int sum = nums[i] + nums[left] + nums[right];
                 if(sum == 0) {
-                    result.push_back({nums[i],nums[left],nums[right]});
-                    while(left < right && nums[left] == nums[left+1]) {
-                        left++;
-                    }
-                    while(left < right && nums[right] == nums[right-1]) { // 注意这里是right-1，因为right已经指向了最后一个元素
-                        right--;
-                    }
+                    result.push_back({nums[i], nums[left], nums[right]});
+                    while(left<right && nums[left]==nums[left+1]) left++;
+                    while(left<right && nums[right]==nums[right-1]) right--;
                     left++;
                     right--;
-                } else if(sum <0) {
-                    left++;
-                } else {
+                }else if(sum >0) {
                     right--;
+                }else {
+                    left++;
                 }
             }
-        }  
+        }
         return result;
     }
     
